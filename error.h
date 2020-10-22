@@ -1,7 +1,7 @@
 /**
  * @file error.h
  * @author Marek Gergel (xgerge01)
- * @brief IFJ - Error codes and function
+ * @brief IFJ20 Compiler
  */
 
 #ifndef __ERROR_H__
@@ -25,6 +25,6 @@ typedef enum errcodes {
     internalError = 99,
 } errcodes_t;
 
-void errorExit(errcodes_t errcode, char* fmt, ...);
+void errorExit(errcodes_t errcode, char* errmsg, ...);
 
 #endif // __ERROR_H__

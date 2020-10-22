@@ -1,12 +1,12 @@
 /**
  * @file error.c
  * @author Marek Gergel (xgerge01)
- * @brief IFJ - Error exit function
+ * @brief IFJ20 Compiler
  */
 
 #include "error.h"
 
-void errorExit(int errcode, char* errmsg, ...) {
+void errorExit(errcodes_t errcode, char* errmsg, ...) {
     fflush(stdout);
     fflush(stderr);
     va_list args;
