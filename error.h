@@ -1,19 +1,18 @@
 /**
  * @file error.h
  * @author Marek Gergel (xgerge01)
- * @brief IFJ20 Compiler
+ * @brief IFJ20 - Error codes and exit function
  */
 
 #ifndef __ERROR_H__
 #define __ERROR_H__
 
-//#include "resources.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "list.h"
 
 typedef enum errcodes {
-    noError = 0,
     lexicalError = 1,
     syntaxError = 2,
     semanticIdentifierError = 3,

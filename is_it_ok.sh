@@ -212,7 +212,7 @@ fi
 
 #    6) Najdi prelozeny binarni soubor
 echo -n "Searching for created binary file: "
-EXE=`ls -F | grep "*" | tr -d "*" | grep "" -m 1`   # A najít binárku...
+EXE=`ls -F | grep "*" | tr -d "*" | grep "" -m 1`   # A najï¿½t binï¿½rku...
 if [[ -f $EXE ]]; then
   echo_color green "OK ($EXE)"
 else
