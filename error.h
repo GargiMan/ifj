@@ -24,6 +24,8 @@ typedef enum errcodes {
     internalError = 99,
 } errcodes_t;
 
-void errorExit(errcodes_t errcode, char* errmsg, ...);
+void errorExit(errcodes_t errcode, char* msg, ...);
+
+void warningPrint(char* msg, ...);
 
 #endif // __ERROR_H__

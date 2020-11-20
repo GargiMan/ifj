@@ -6,17 +6,15 @@
 
 #include "scanner.h"
 
-void readFile(FILE* fd) {
+void readFile() {
+    
     int c = 0;
     String_t s = NULL;
-
-    if (!fd) errorExit(internalError, "scanner.h : File descriptor is not valid");
-
     LListItem_t* temp = NULL;
 
     while (!IS_EOF(c)) {
 
-        c = getc(fd);
+        c = getc(stdin);
 
         if (!temp && !IS_NOT_TERM(c)) {
             ITEM_CREATE(temp);

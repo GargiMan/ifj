@@ -6,7 +6,7 @@
 
 #include "error.h"
 
-void errorExit(errcodes_t errcode, char* errmsg, ...) {
+void errorExit(errcodes_t errcode, char* msg, ...) {
     fflush(stdout);
     fflush(stderr);
     va_list args;
@@ -16,4 +16,14 @@ void errorExit(errcodes_t errcode, char* errmsg, ...) {
     va_end(args);
     LIST_CLEAR;
     exit(errcode);
+}
+
+void warningPrint(char* msg, ...) {
+    fflush(stdout);
+    fflush(stderr);
+    va_list args;
+    va_start(args, errmsg);
+    fprintf(stderr, "Warning: ");
+    vfprintf(stderr, errmsg, args);
+    va_end(args);
 }
