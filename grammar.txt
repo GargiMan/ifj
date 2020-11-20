@@ -1,0 +1,20 @@
+﻿<prog> -> package ID $ <exec>
+<exec> -> <func> <func_n>
+<func> -> ID (<params>)<func_types>{ $ <body>}
+<func_types> -> (INT <types_n>)
+<func_types> -> (FLOAT64 <types_n>)
+<func_types> -> (STRING <types_n>)
+<func_types> -> eps
+<types_n> -> , <type> <types_n>
+<types_n> -> eps
+<type> -> INT
+<type> -> FLOAT64
+<type> -> STRING
+<params> -> ID <type> <params_n>
+<params> -> eps
+<params_n> -> , ID <type> <params_n>
+<params_n> -> eps
+<func_n> -> $ <func> <func_n>
+<func_n> -> eps
+<body> -> 
+
