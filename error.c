@@ -1,7 +1,7 @@
 /**
  * @file error.c
  * @author Marek Gergel (xgerge01)
- * @brief IFJ20 Compiler
+ * @brief IFJ20 - Exit function
  */
 
 #include "error.h"
@@ -11,9 +11,9 @@ void errorExit(errcodes_t errcode, char* errmsg, ...) {
     fflush(stderr);
     va_list args;
     va_start(args, errmsg);
-    fprintf(stderr, "Error: ");     //error prefix
-    vfprintf(stderr, errmsg, args);    //error message
+    fprintf(stderr, "Error: ");
+    vfprintf(stderr, errmsg, args);
     va_end(args);
-    //freeResources();
+    LIST_CLEAR;
     exit(errcode);
 }

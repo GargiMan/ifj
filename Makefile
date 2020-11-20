@@ -2,7 +2,7 @@
 # Author: Marek Gergel (xgerge01)
 # Brief: IFJ20 Compiler
 
-C = gcc -std=c11 -Wall -Wextra -pedantic -lm
+C = gcc -std=c11 -Wall -Wextra -pedantic -g
 OBJ = $(patsubst %.c,%.o,$(wildcard *.c))
 PROG = ifj20
 LOGIN = xjacol00
@@ -12,10 +12,13 @@ LOGIN = xjacol00
 all: $(PROG)
 
 %.o: %.c
-	$(C) -c $<
+	$(C) -c $< -lm
 
 $(PROG): $(OBJ)
-	$(C) $^ -o $@
+	$(C) $^ -o $@ -lm
+
+test:
+	./tests/ic20ifj ./tests/factorial.go
 
 check: zip
 	./is_it_ok.sh $(LOGIN).zip $(LOGIN)
