@@ -14,7 +14,7 @@ String_t appendChar(String_t s, char c) {
     String_t tmp = realloc(s, (len + 1) * sizeof(char));
     if (!tmp) {
         free(s);
-        errorExit(internalError, "string.h : Char allocation failed");
+        errorExit(internalError, "string : Char allocation failed");
         return NULL;
     }
 

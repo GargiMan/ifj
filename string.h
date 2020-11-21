@@ -4,8 +4,8 @@
  * @brief IFJ20 - Header for operations over string
  */
 
-#ifndef __STRING_H__
-#define __STRING_H__
+#ifndef STRING_H
+#define STRING_H
 
 #include <string.h>
 #include <stdlib.h>
@@ -15,4 +15,4 @@ typedef char* String_t;
 
 String_t appendChar(String_t s, char c);
 
-#endif // __STRING_H__
+#endif // STRING_H

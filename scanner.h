@@ -4,8 +4,8 @@
  * @brief IFJ20 Compiler
  */
 
-#ifndef __SCANNER_H__
-#define __SCANNER_H__
+#ifndef SCANNER_H
+#define SCANNER_H
 
 #include <stdio.h>
 #include "error.h"
@@ -48,6 +48,6 @@
 #define KW_RETURN(s) (!strcmp("return", s))
 #define KW_PACKAGE(s) (!strcmp("package", s))
 
-void readFile();
+void getTokens();
 
-#endif // __SCANNER_H__
+#endif // SCANNER_H

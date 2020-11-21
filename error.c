@@ -6,7 +6,7 @@
 
 #include "error.h"
 
-void errorExit(errcodes_t errcode, char* msg, ...) {
+void errorExit(ErrorCodes_t errcode, char* msg, ...) {
     fflush(stdout);
     fflush(stderr);
     va_list args;
