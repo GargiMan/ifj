@@ -19,7 +19,7 @@ typedef enum TokenType {
     KEYWORD = 2,
 } TokenType_t;
 
-typedef char* TokenValue_t;
+typedef String_t TokenValue_t;
 
 typedef struct Token Token_t;
 

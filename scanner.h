@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "error.h"
 #include "string.h"
-#include "list.h"
+#include "tokenlist.h"
 
 #define IS_EOF(c) (c == EOF)
 #define IS_EOL(c) (c == '\n' || c == '\r')

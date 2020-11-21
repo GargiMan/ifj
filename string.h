@@ -7,11 +7,11 @@
 #ifndef STRING_H
 #define STRING_H
 
+typedef char* String_t;
+
 #include <string.h>
 #include <stdlib.h>
 #include "error.h"
-
-typedef char* String_t;
 
 String_t appendChar(String_t s, char c);
 
