@@ -24,7 +24,7 @@ int main() {
     //debug
     Token_t* temp = LIST_HEAD;
     while (temp) {
-        printf("%s\n",temp->token->value);
+        printf("%s\n",temp->value);
         TOKEN_MOVE_NEXT(temp);
     }
 
