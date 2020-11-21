@@ -6,11 +6,11 @@
 
 #include "scanner.h"
 
-void readFile() {
+void getTokens() {
 
     int c = 0, c2 = 0;
     String_t s = NULL;
-    LListItem_t* temp = NULL;
+    Token_t* token = NULL;
 
     while (!IS_EOF(c)) {
 
@@ -21,45 +21,111 @@ void readFile() {
             c = getchar();
         }
 
-        //slash -> comments or div
-        if (IS_SLASH(c)) {
+        switch (c) {
 
-            c2 = getchar();
+            case EOF: case '\n': case '\r': case '\t': case ' ':    //not term , skip
+                break;
 
-            //signle line
-            if (IS_SLASH(c2)) {
-                while (!IS_EOL(c2)) c2 = getchar();
-                c2 = 0;
-                continue;
-            }
-
-            //multi line
-            if (IS_ASTERISK(c2)) {
-                while (!IS_EOF(c2 = getchar())) { 
-                    if (IS_ASTERISK(c2) && IS_SLASH(c2 = getchar())) break;
+            case '/':                           //slash ->
+                switch (c2 = getchar()) {
+                    case '/':                           //single line comment
+                        while (!IS_EOL(c2)) {
+                            c2 = getchar();
+                        }
+                        c2 = 0;
+                        break;
+                    case '*':                           //multi line comment
+                        while (!IS_EOF(c2)) if (((getchar() == '*') && (getchar() == '/'))) break;
+                        c2 = 0;
+                        break;
+                    default:                            //div
+                        TOKEN_CREATE(token);
+                        TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                        LIST_ADD_TOKEN(token);
+                        break;
                 }
-                c2 = 0;
-                continue;
-            }
+                break;
+
+            case '*':                           //mul
+                TOKEN_CREATE(token);
+                TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                LIST_ADD_TOKEN(token);
+                break;
+
+
+            case ':':                           //colon ->
+                switch (c2 = getchar()) {
+                    case '=':                           //declare
+                        TOKEN_CREATE(token);
+                        s = appendChar(NULL, c);
+                        s = appendChar(s, c2);
+                        TOKEN_SET_VALUE(token, s);
+                        LIST_ADD_TOKEN(token);
+                        c2 = 0;
+                        break;
+                    default:                            //error
+                        errorExit(lexicalError, "scanner : Operator ':' is incorrect");
+                        break;
+                }
+                break;
+
+            case '=':                           //equals ->
+                switch (c2 = getchar()) {
+                    case '=':                           //equals to
+                        TOKEN_CREATE(token);
+                        s = appendChar(NULL, c);
+                        s = appendChar(s, c2);
+                        TOKEN_SET_VALUE(token, s);
+                        LIST_ADD_TOKEN(token);
+                        c2 = 0;
+                        break;
+                    default:                            //assign
+                        TOKEN_CREATE(token);
+                        TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                        LIST_ADD_TOKEN(token);
+                        break;
+                }
+                break;
+
+            case '>':                           //greater
+                switch (c2 = getchar()) {
+                    case '=':                           //greater or equal to
+                        TOKEN_CREATE(token);
+                        s = appendChar(NULL, c);
+                        s = appendChar(s, c2);
+                        TOKEN_SET_VALUE(token, s);
+                        LIST_ADD_TOKEN(token);
+                        c2 = 0;
+                        break;
+                    default:                            //greater than
+                        TOKEN_CREATE(token);
+                        TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                        LIST_ADD_TOKEN(token);
+                        break;
+                }
+                break;
+
+            case '<':                           //less
+                switch (c2 = getchar()) {
+                    case '=':                           //less or equal to
+                        TOKEN_CREATE(token);
+                        s = appendChar(NULL, c);
+                        s = appendChar(s, c2);
+                        TOKEN_SET_VALUE(token, s);
+                        LIST_ADD_TOKEN(token);
+                        c2 = 0;
+                        break;
+                    default:                            //less than
+                        TOKEN_CREATE(token);
+                        TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                        LIST_ADD_TOKEN(token);
+                        break;
+                }
+                break;
+
+            default:
+                break;
         }
-
-        if (!temp && !IS_NOT_TERM(c)) { //need to add slash or destroy item
-            ITEM_CREATE(temp);
-            if (!temp) errorExit(internalError, "scanner.h : Item allocation failed");
-            s = NULL;
-        } 
-
-        //not terminals
-        if (IS_NOT_TERM(c)) {
-            if (!temp) continue;
-            temp->token = s;
-            LIST_ADD_ITEM(temp);
-            temp = NULL;
-            continue;
-        }
-
-        //add char
-        s = appendChar(s, c);
     } 
 
     return;
