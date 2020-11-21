@@ -1,7 +1,7 @@
 /**
  * @file tokenlist.h
  * @author Marek Gergel (xgerge01)
- * @brief IFJ20 - Operations over list and tokens
+ * @brief IFJ20 - Operations over list with tokens
  */
 
 #ifndef TOKENLIST_H
@@ -49,7 +49,8 @@ extern List_t list;
 #define TOKEN_SET_NEXT(token, next) (TOKEN_NEXT(token) = next)
 
 #define TOKEN_CREATE(token) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
-#define TOKEN_DESTROY(token) (free(token))
+#define TOKEN_MOVE_NEXT(token) (token = TOKEN_NEXT(token))
+#define TOKEN_DESTROY(token) free(token)
 
 //list operations
 
@@ -58,7 +59,7 @@ extern List_t list;
 
 #define LIST_IS_EMPTY (!LIST_HEAD)
 
-#define LIST_ADD_TOKEN(token) if (LIST_IS_EMPTY) {LIST_HEAD = token; LIST_TAIL = token;} else {TOKEN_SET_NEXT(LIST_TAIL, token); LIST_TAIL = token;} (void)0
+#define LIST_ADD_TOKEN(token) do { if (LIST_IS_EMPTY) {LIST_HEAD = token; LIST_TAIL = token;} else {TOKEN_SET_NEXT(LIST_TAIL, token); LIST_TAIL = token;}} while (0)
 #define LIST_CLEAR while (!LIST_IS_EMPTY) {LIST_TAIL = TOKEN_NEXT(LIST_HEAD); TOKEN_DESTROY(LIST_HEAD); LIST_HEAD = LIST_TAIL;}
 
 #endif // TOKENLIST_H

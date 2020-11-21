@@ -14,7 +14,7 @@ void errorExit(ErrorCodes_t errcode, char* msg, ...) {
     fprintf(stderr, "Error: ");
     vfprintf(stderr, msg, args);
     va_end(args);
-    LIST_CLEAR;
+    FREE_RESOURCES;
     exit(errcode);
 }
 

@@ -9,8 +9,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include "list.h"
+#include "resources.h"
 
 typedef enum ErrorCodes {
     lexicalError = 1,
