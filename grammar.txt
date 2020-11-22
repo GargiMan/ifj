@@ -1,20 +1,25 @@
-﻿<prog> -> package ID $ <exec>
+<prog> -> package id $ <exec>
 <exec> -> <func> <func_n>
-<func> -> ID (<params>)<func_types>{ $ <body>}
-<func_types> -> (INT <types_n>)
-<func_types> -> (FLOAT64 <types_n>)
-<func_types> -> (STRING <types_n>)
-<func_types> -> eps
-<types_n> -> , <type> <types_n>
-<types_n> -> eps
-<type> -> INT
-<type> -> FLOAT64
-<type> -> STRING
-<params> -> ID <type> <params_n>
-<params> -> eps
-<params_n> -> , ID <type> <params_n>
-<params_n> -> eps
-<func_n> -> $ <func> <func_n>
-<func_n> -> eps
-<body> -> 
+<func> -> func id (<params>)<func_types>{ $ <body>}
+<func_types> -> (int <types_n>) | (float64 <types_n>) | (string <types_n>) | eps
+<types_n> -> , <type> <types_n> | eps
+<type> -> int | float64 | string
+<params> -> id <type> <params_n> | eps
+<params_n> -> , id <type> <params_n> | eps
+<func_n> -> $ <func> <func_n> | eps
+<body> -> <exec> | <statements>
+<statements> -> <statement> <statements>
+<statements> -> <statement> | eps
+<statement> -> <definition> | <assignment> | <if> | <for> | <call> | <return>
+<definition> -> id := <expression>
+<assignment> -> <ids> = <expressions> | <ids> = <call>
+<ids> -> id <ids_n>
+<ids_n> -> , id <ids_n> | eps
+<expressions> -> <expression> <expression_n>
+<expression_n> -> , <expression> <expression_n> | eps
+<if> -> if (<expression>) { $ <statements> } else { $ <statements>}
+<for> -> for (<definition> | <assignment> | eps ; <expression> ; <assignment> ) { $ <body> }
+<call> -> id(<params>)
+<return> -> return <expressions>
+
 
