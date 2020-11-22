@@ -14,9 +14,35 @@
 //token structure
 
 typedef enum TokenType {
-    IDENTIFIER = 0,
-    OPERATOR = 1,
-    KEYWORD = 2,
+    EOL = 0,                    // EOL
+    IDENTIFIER,                 // id
+    NUMBER,                     // num
+    STRING,                     // str
+    KEYWORD_INT = 10,           // int
+    KEYWORD_FLOAT64,            // float64
+    KEYWORD_STRING,             // string
+    KEYWORD_IF,                 // if
+    KEYWORD_ELSE,               // else
+    KEYWORD_FOR,                // for
+    KEYWORD_FUNC,               // func
+    KEYWORD_RETURN,             // return
+    KEYWORD_PACKAGE,            // package
+    OPERATOR_PLUS = 30,         // +
+    OPERATOR_MINUS,             // -
+    OPERATOR_MUL,               // *
+    OPERATOR_DIV,               // /
+    OPERATOR_AND,               // &&
+    OPERATOR_OR,                // ||
+    OPERATOR_NOT,               // !
+    OPERATOR_EQUAL,             // ==
+    OPERATOR_GREATER,           // >
+    OPERATOR_GREATER_OR_EQUAL,  // >=
+    OPERATOR_LESS,              // <
+    OPERATOR_LESS_OR_EQUAL,     // <=
+    BRACKET_ROUND_OPEN = 50,    // (
+    BRACKET_ROUND_CLOSE,        // )
+    BRACKET_CURLY_OPEN,         // {
+    BRACKET_CURLY_CLOSE,        // }
 } TokenType_t;
 
 typedef String_t TokenValue_t;

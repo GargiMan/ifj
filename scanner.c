@@ -23,7 +23,13 @@ void getTokens() {
 
         switch (c) {
 
-            case EOF: case '\n': case '\r': case '\t': case ' ':    //not term , skip
+            case '\n': case '\r':               //eol
+                TOKEN_CREATE(token);
+                TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                LIST_ADD_TOKEN(token);
+                break;
+
+            case EOF: case '\t': case ' ':      //not term , skip
                 break;
 
             case '/':                           //slash ->
