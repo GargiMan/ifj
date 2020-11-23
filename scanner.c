@@ -26,6 +26,7 @@ void getTokens() {
             case '\n': case '\r':               //eol
                 TOKEN_CREATE(token);
                 TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                TOKEN_SET_TYPE(token, EOL);
                 LIST_ADD_TOKEN(token);
                 break;
 
@@ -58,6 +59,17 @@ void getTokens() {
                 LIST_ADD_TOKEN(token);
                 break;
 
+            case '+':                           //plus
+                TOKEN_CREATE(token);
+                TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                LIST_ADD_TOKEN(token);
+                break;
+
+            case '-':                           //minus
+                TOKEN_CREATE(token);
+                TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                LIST_ADD_TOKEN(token);
+                break;
 
             case ':':                           //colon ->
                 switch (c2 = getchar()) {
@@ -70,7 +82,7 @@ void getTokens() {
                         c2 = 0;
                         break;
                     default:                            //error
-                        errorExit(lexicalError, "scanner : Operator ':' is incorrect");
+                        errorExit(lexicalError, "scanner : Operator '%c' does not exist", c);
                         break;
                 }
                 break;
@@ -127,6 +139,77 @@ void getTokens() {
                         LIST_ADD_TOKEN(token);
                         break;
                 }
+                break;
+
+            case '!':                           //not
+                switch (c2 = getchar()) {
+                    case '=':                           //not equal
+                        TOKEN_CREATE(token);
+                        s = appendChar(NULL, c);
+                        s = appendChar(s, c2);
+                        TOKEN_SET_VALUE(token, s);
+                        LIST_ADD_TOKEN(token);
+                        c2 = 0;
+                        break;
+                    default:                            //not
+                        TOKEN_CREATE(token);
+                        TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                        LIST_ADD_TOKEN(token);
+                        break;
+                }
+
+            case '&'                            //or
+                switch (c2 = getchar()) {
+                    case '&':                           //and
+                        TOKEN_CREATE(token);
+                        s = appendChar(NULL, c);
+                        s = appendChar(s, c2);
+                        TOKEN_SET_VALUE(token, s);
+                        LIST_ADD_TOKEN(token);
+                        c2 = 0;
+                        break;
+                    default:                            //error
+                        errorExit(lexicalError, "scanner : Operator '%c' does not exist", c);
+                        break;
+                }
+
+            case '|'                            //or
+                switch (c2 = getchar()) {
+                    case '|':                           //or
+                        TOKEN_CREATE(token);
+                        s = appendChar(NULL, c);
+                        s = appendChar(s, c2);
+                        TOKEN_SET_VALUE(token, s);
+                        LIST_ADD_TOKEN(token);
+                        c2 = 0;
+                        break;
+                    default:                            //error
+                        errorExit(lexicalError, "scanner : Operator '%c' does not exist", c);
+                        break;
+                }
+
+            case '{':                           //curly open
+                TOKEN_CREATE(token);
+                TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                LIST_ADD_TOKEN(token);
+                break;
+
+            case '}':                           //curly close
+                TOKEN_CREATE(token);
+                TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                LIST_ADD_TOKEN(token);
+                break;
+
+            case '(':                           //round open
+                TOKEN_CREATE(token);
+                TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                LIST_ADD_TOKEN(token);
+                break;
+
+            case ')':                           //round close
+                TOKEN_CREATE(token);
+                TOKEN_SET_VALUE(token, appendChar(NULL, c));
+                LIST_ADD_TOKEN(token);
                 break;
 
             default:
