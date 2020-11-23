@@ -14,7 +14,7 @@
 
 #define IS_EOF(c) (c == EOF)
 #define IS_EOL(c) (c == '\n' || c == '\r')
-#define IS_NOT_TERM(c) (IS_EOF(c) || c == ' ' || c == '\t' || c == '\0')
+#define IS_NOT_TERM(c) (c == EOF || c == ' ' || c == '\t' || c == '\0')
 
 #define IS_NUMBER(c) (c > 47 && c < 58) // 0-9
 #define IS_CHARACTER(c) ((c > 64 && c < 91) || (c > 96 && c < 123)) // a-z || A-Z

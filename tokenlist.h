@@ -27,13 +27,16 @@ typedef enum TokenType {
     KEYWORD_FUNC,               // func
     KEYWORD_RETURN,             // return
     KEYWORD_PACKAGE,            // package
-    OPERATOR_PLUS = 30,         // +
+    OPERATOR_DEFINE = 30,       // :=
+    OPERATOR_ASSIGN,            // =
+    OPERATOR_PLUS,              // +
     OPERATOR_MINUS,             // -
     OPERATOR_MUL,               // *
     OPERATOR_DIV,               // /
     OPERATOR_AND,               // &&
     OPERATOR_OR,                // ||
     OPERATOR_NOT,               // !
+    OPERATOR_NOT_EQUAL          // !=
     OPERATOR_EQUAL,             // ==
     OPERATOR_GREATER,           // >
     OPERATOR_GREATER_OR_EQUAL,  // >=
