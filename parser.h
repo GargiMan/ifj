@@ -15,29 +15,29 @@
 #include "error.h"
 //#include "symtable.h"
 
-int parse(List_t *TokenList);
-int prog(List_t *TokenList);
-int exec(List_t *TokenList);
-int func(List_t *TokenList);
-int func_types(List_t *TokenList);
-int types_n(List_t *TokenList);
-int type(List_t *TokenList);
-int params(List_t *TokenList);
-int params_n(List_t *TokenList);
-int func_n(List_t *TokenList);
-int body(List_t *TokenList);
-int statements(List_t *TokenList);
-int statement(List_t *TokenList);
-int definition(List_t *TokenList);
-int assignment(List_t *TokenList);
-int ids(List_t *TokenList);
-int ids_n(List_t *TokenList);
-int expressions(List_t *TokenList);
-int expression_n(List_t *TokenList);
-int expression(List_t *TokenList);
-int _if(List_t *TokenList);
-int _for(List_t *TokenList);
-int _call(List_t *TokenList);
-int _return(List_t *TokenList);
+int parse();//
+int prog();//
+int exec();//
+int func();//
+int func_types();//
+int types_n();//
+int type();//
+int params();//
+int params_n();//
+int func_n();//
+int body();//
+int statements();//
+int statement();//
+int definition();//
+int assignment();//
+int ids();//
+int ids_n();//
+int expressions();
+int expression_n();
+int expression();
+int _if();//
+int _for();//
+int _call();//
+int _return();//
 
 #endif
