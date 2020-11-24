@@ -6,48 +6,56 @@
 
 #include "parser.h"
 Token_t *activeToken;
-int epsFlag;
+int decisionFlag;
 #define NEXT_TOKEN(activeToken)(activeToken = activeToken->pNext)
-#define SYNTAX_OK  0
-#define CHECK_OK(result) if (result != SYNTAX_OK){return result;}
+#define syntaxOK  0
+#define CHECK_OK(result) if (result != syntaxOK){return result;}
 #define CHECK_TYPE(TOKENTYPE) \
     if (activeToken->type != TOKENTYPE){ \
         return syntaxError; \
     }
 #define CHECK_EOF() \
-    if (activeToken->type != EndOfFile) {return syntaxError;} ///// treba tokentype EOF
+    if (activeToken == list.pTail) {return syntaxOK;}else{return syntaxError;} ///// treba tokentype EOF
 
-#define CHECK_EPS(TOKENTYPE) \
+#define TEST_TYPE(TOKENTYPE) \
     if (activeToken->type == TOKENTYPE){ \
-        epsFlag = 1; \
+        decisionFlag = 1; \
     } else \
     { \
-        epsFlag = 0; \
+        decisionFlag = 0; \
     } \
+
+#define DECIDE() \
+    if (decisionFlag){return syntaxOK;} \
+
+#define CHECK_STATE(state) \
+    if (state() == syntaxError){ \
+        return syntaxError; \
+    }else{ return syntaxOK;} \
+
     
 
 
 
 int parse(){
+
     activeToken = list.pHead;
-    int result = prog();
-    return result;
+    CHECK_STATE(prog);
+    return syntaxOK;
 }
 
 //<prog> -> package id $ <exec>
 int prog(){
 
-   int result;
    CHECK_TYPE(KEYWORD_PACKAGE); 
    NEXT_TOKEN(activeToken);
    CHECK_TYPE(IDENTIFIER);
     if(!strcmp("main",activeToken->value)){ // hodil by sa tokentype keyword main
         NEXT_TOKEN(activeToken);
         CHECK_TYPE(EOL); // $
-        result = exec(); //all ok -> next step
-        CHECK_OK(result); //kontrola vysledku
+        CHECK_STATE(exec);
         CHECK_EOF();
-        return SYNTAX_OK; //syntax ok
+        return syntaxOK; //syntax ok
     
     }
     return syntaxError;
@@ -56,18 +64,18 @@ int prog(){
 
 int exec(){
 //<exec> -> <func> <func_n>
-    int result;
+   
     NEXT_TOKEN(activeToken);
-    result = func();
+    CHECK_STATE(func);
 
     NEXT_TOKEN(activeToken);
-    result = func_n();
+    CHECK_STATE(func_n);
+
     
-    return result;
 }
 int func(){
 //<func> -> func id (<params>)<func_types>{ $ <body>}
-    int result;
+    
     CHECK_TYPE(KEYWORD_FUNC);
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(IDENTIFIER);
@@ -75,103 +83,82 @@ int func(){
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
     NEXT_TOKEN(activeToken); // id alebo eps
-    result = params();
-    CHECK_OK(result);
+    CHECK_STATE(params);
+    
     //NEXT_TOKEN();
     CHECK_TYPE(BRACKET_ROUND_CLOSE);
     NEXT_TOKEN(activeToken);
-    result = func_types();
-    CHECK_OK(result);
+    CHECK_STATE(func_types);
+    
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(BRACKET_CURLY_OPEN);
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(EOL);
-    result = body();
-    CHECK_OK(result);
+    CHECK_STATE(body);
 
-    return result;
 }
 int params(){
     //<params> -> id <type> <p  arams_n> | eps
-    int result;
-    CHECK_EPS(BRACKET_ROUND_CLOSE);
-    if(epsFlag){
-        return SYNTAX_OK;
-    }
+    
+    TEST_TYPE(BRACKET_ROUND_CLOSE);
+    DECIDE();
     CHECK_TYPE(IDENTIFIER);
     //TODO ulozit ID do symtable
     NEXT_TOKEN(activeToken);
-    result = type();
-    CHECK_OK(result);
+    CHECK_STATE(type);
     NEXT_TOKEN(activeToken);
-    CHECK_EPS(BRACKET_ROUND_CLOSE);
-    if(epsFlag){
-        return SYNTAX_OK;
-    }
-    result = params_n();
-
-    return result;
+    TEST_TYPE(BRACKET_ROUND_CLOSE);
+    DECIDE();
+    CHECK_STATE(params_n);
 
 }
 
 int type(){
 //<type> -> int | float64 | string
-if (activeToken->type == KEYWORD_INT) {
-		// <TYPE> -> int
-		return SYNTAX_OK;
-	} else if (activeToken->type == KEYWORD_FLOAT64) {
-		// <TYPE> -> float64
-		return SYNTAX_OK;
-	} if (activeToken->type == KEYWORD_STRING) {
-		// <TYPE> -> string
-		return SYNTAX_OK;
-	}
+   
+    TEST_TYPE(KEYWORD_INT);
+    DECIDE();
+    TEST_TYPE(KEYWORD_FLOAT64);
+    DECIDE();
+    TEST_TYPE(KEYWORD_STRING);
+    DECIDE();
+    return syntaxError;
 
-	return syntaxError;
 }
 int params_n(){
     //<params_n> -> , id <type> <params_n> | eps
-    CHECK_EPS(BRACKET_ROUND_CLOSE);
-    if(epsFlag){
-        return SYNTAX_OK;
-    }
+    TEST_TYPE(BRACKET_ROUND_CLOSE);
+    DECIDE();
     CHECK_TYPE(COMMA);
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(IDENTIFIER);
     //ID do symtable
     NEXT_TOKEN(activeToken);
-    int result = type();
-    CHECK_OK(result);
+    CHECK_STATE(type);
     NEXT_TOKEN(activeToken);
-    result = params_n();
-    return result; ///neni treba asi
+    CHECK_STATE(params_n);
 
 }
 int func_types(){
    // <func_types> -> (int <types_n>) | (float64 <types_n>) | (string <types_n>) | eps
-   CHECK_EPS(BRACKET_CURLY_OPEN);
-   if(epsFlag){return SYNTAX_OK;}
+   TEST_TYPE(BRACKET_CURLY_OPEN);
+   DECIDE();
    CHECK_TYPE(BRACKET_ROUND_OPEN);
    NEXT_TOKEN(activeToken);
-   int result = type();
-   CHECK_OK(result);
-   result = types_n();
-   CHECK_OK(result);
-   CHECK_TYPE(BRACKET_ROUND_CLOSE)
-   return result;
+   CHECK_STATE(type);
+   CHECK_STATE(types_n);
+   CHECK_TYPE(BRACKET_ROUND_CLOSE);
 
 
 }
 int types_n(){
     //<types_n> -> , <type> <types_n> | eps
-    CHECK_EPS(BRACKET_ROUND_CLOSE);
-    if(epsFlag){return SYNTAX_OK;}
+    TEST_TYPE(BRACKET_ROUND_CLOSE);
+    DECIDE();
     CHECK_TYPE(COMMA);
     NEXT_TOKEN(activeToken);
-    int result = type();
-    CHECK_OK(result);
-    result = types_n();
-    return result; // asi netreba
+    CHECK_STATE(type);
+    CHECK_STATE(types_n);
 
 }
 int func_n(){
@@ -181,12 +168,9 @@ int func_n(){
 int body(){
 //act token EOL
 //<body> -> <statement> <statements>
-    int result = statement();
-    CHECK_OK(result);
+    CHECK_STATE(statement);
     NEXT_TOKEN(activeToken);
-    result = statements();
-    CHECK_OK(result);
-    return result;
+    CHECK_STATE(statements);
 }
 int statement(){
 //<statement> -> <definition> | <assignment> | <if> | <for> | <call> | <return>
@@ -203,20 +187,16 @@ int statements(){
 }
 int definition(){
 //<definition> -> id := <expression>
-    int result;
     CHECK_TYPE(IDENTIFIER);
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(OPERATOR_DEFINE);
     NEXT_TOKEN(activeToken);
-    result = expression();
-    CHECK_OK(result);
-    return result;
+    CHECK_STATE(expression);
 
 }
 int assignment(){
 //<assignment> -> <ids> = <expressions> | <ids> = <call>
-    int result = ids();
-    CHECK_OK(result);
+    CHECK_STATE(ids);
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(OPERATOR_ASSIGN);
     //expressions alebo call
@@ -242,25 +222,21 @@ int _return(){
 }
 int ids(){
 //<ids> -> id <ids_n>
-    int result;
+    
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(IDENTIFIER);
-    result = ids_n();
-    CHECK_OK(result);
-    return result;
+    CHECK_STATE(ids_n);
 
 }
 int ids_n(){
 //<ids_n> -> , id <ids_n> | eps
-    int result;
     NEXT_TOKEN(activeToken);
-    CHECK_EPS(OPERATOR_ASSIGN);
-    if(epsFlag){return SYNTAX_OK;}
+    TEST_TYPE(OPERATOR_ASSIGN);
+    DECIDE();
     CHECK_TYPE(COMMA);
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(IDENTIFIER);
-    result = ids_n();
-    return result;//asi netreba
+    CHECK_STATE(ids_n);
 
 }
 
