@@ -270,7 +270,7 @@ void getTokens() {
                                 s = strAppendChar(s, c2);
                                 c = getchar();
                                 c2 = getchar();
-                                if (!(IS_NUMBER_HEX(c) && IS_NUMBER_HEX(c2))) errorExit(lexicalError, "Escape sequence '\\x%c%c' is not hexadecimal value\n", c, c2);
+                                if (!(IS_NUMBER_HEX(c) && IS_NUMBER_HEX(c2))) errorExit(lexicalError, "Escape sequence '\\x%c%c' has incorrect hexadecimal value\n", c, c2);
                                 s = strAppendChar(s, c);
                                 s = strAppendChar(s, c2);
                                 break;
