@@ -51,7 +51,7 @@ typedef enum TokenType {
     COMMA,                      // ,
 } TokenType_t;
 
-typedef String_t TokenValue_t;
+typedef String_t* TokenValue_t;
 
 typedef struct Token Token_t;
 
@@ -80,10 +80,10 @@ extern List_t list;
 #define TOKEN_SET_VALUE(token, value) (TOKEN_VALUE(token) = value)
 #define TOKEN_SET_NEXT(token, next) (TOKEN_NEXT(token) = next)
 
-#define TOKEN_CREATE(token) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
+#define TOKEN_CREATE(token) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_VALUE(tokeh, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
 #define TOKEN_MOVE_NEXT(token) (token = TOKEN_NEXT(token))
 #define TOKEN_IS_TYPE(token, type) (TOKEN_TYPE(token) == type)
-#define TOKEN_DESTROY(token) free(token)
+#define TOKEN_DESTROY(token) do { free(token->value); free(token); } while (0)
 
 //list operations
 
