@@ -32,11 +32,11 @@ int definition();//
 int assignment();//
 int ids();//
 int ids_n();//
-int expressions();
-int expression_n();
+int expressions();//
+int expression_n();//
 int expression();
 int _if();//
-int _for();//
+int _for();
 int _call();//
 int _return();//
 

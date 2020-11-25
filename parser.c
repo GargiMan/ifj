@@ -9,11 +9,11 @@ Token_t *activeToken;
 int decisionFlag;
 #define NEXT_TOKEN(activeToken)(activeToken = activeToken->pNext)
 #define syntaxOK  0
-#define CHECK_OK(result) if (result != syntaxOK){return result;}
 #define CHECK_TYPE(TOKENTYPE) \
     if (activeToken->type != TOKENTYPE){ \
         return syntaxError; \
-    }
+    }   \
+
 #define CHECK_EOF() \
     if (activeToken == list.pTail) {return syntaxOK;}else{return syntaxError;} ///// treba tokentype EOF
 
@@ -30,8 +30,7 @@ int decisionFlag;
 
 #define CHECK_STATE(state) \
     if (state() == syntaxError){ \
-        return syntaxError; \
-    }else{ return syntaxOK;} \
+        return syntaxError;} \
 
     
 
@@ -95,10 +94,11 @@ int func(){
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(EOL);
     CHECK_STATE(body);
+    CHECK_TYPE(BRACKET_CURLY_CLOSE);
 
 }
 int params(){
-    //<params> -> id <type> <p  arams_n> | eps
+    //<params> -> id <type> <params_n> | eps
     
     TEST_TYPE(BRACKET_ROUND_CLOSE);
     DECIDE();
@@ -162,27 +162,70 @@ int types_n(){
 
 }
 int func_n(){
-//<func_n> -> $ <func> <func_n> | eps
-    return 0;
+//<func_n> -> $ <func> <func_n> | eps //ak uz nie su dalsie funkcie tak je EOF
+    TEST_TYPE(EOL);
+    if (decisionFlag){
+        CHECK_TYPE(EOL);
+        NEXT_TOKEN(activeToken);
+        CHECK_STATE(func);
+        CHECK_STATE(func_n);
+    }
+    NEXT_TOKEN(activeToken);
+    CHECK_EOF()
 }
 int body(){
 //act token EOL
 //<body> -> <statement> <statements>
-    CHECK_STATE(statement);
-    NEXT_TOKEN(activeToken);
+    CHECK_STATE(statement); //ak je body prazdne tak activeToken by mal byt } //ak vyjdeme z call tak activeToken je )
     CHECK_STATE(statements);
 }
 int statement(){
 //<statement> -> <definition> | <assignment> | <if> | <for> | <call> | <return>
-    NEXT_TOKEN(activeToken);
-    //TODO switch podla typu tokenu
 
-    return 0;
+    NEXT_TOKEN(activeToken); // prvy token v body okrem EOLu
+    //TODO switch podla typu tokenu
+    Token_t *savedToken = activeToken; // ulozenie prveho tokenu
+
+    // <call> | <definition> | <assignment>
+    TEST_TYPE(IDENTIFIER);
+    if(decisionFlag){
+        CHECK_TYPE(IDENTIFIER);
+        NEXT_TOKEN(activeToken);
+        switch(activeToken->type){
+
+            activeToken = savedToken;
+
+            case BRACKET_ROUND_OPEN: CHECK_STATE(_call);
+
+            case OPERATOR_DEFINE: CHECK_STATE(definition);
+        
+            case OPERATOR_ASSIGN: CHECK_STATE(assignment);
+
+            default: return syntaxError;
+        }
+    }
+
+    //<if> | <for> | <return>
+    TEST_TYPE(KEYWORD_IF);
+    if(decisionFlag){
+        CHECK_STATE(_if);
+    }
+    TEST_TYPE(KEYWORD_FOR);
+    if(decisionFlag){
+        CHECK_STATE(_for);
+    }
+    CHECK_STATE(_return);
 }
 
 int statements(){
-//<statements> -> <statement> | eps
-    return 0;
+//<statements> -> <statement> <statements> | eps
+    TEST_TYPE(BRACKET_CURLY_CLOSE);
+    DECIDE();// eps
+    
+    CHECK_STATE(statement);
+    NEXT_TOKEN(activeToken); 
+    CHECK_STATE(statements);
+
 
 }
 int definition(){
@@ -199,31 +242,107 @@ int assignment(){
     CHECK_STATE(ids);
     NEXT_TOKEN(activeToken);
     CHECK_TYPE(OPERATOR_ASSIGN);
-    //expressions alebo call
+    Token_t *savedTokenAssign = activeToken; // tokentype "="
+    NEXT_TOKEN(activeToken);  //expressions alebo call token
+    Token_t *savedTokenID = activeToken;// tokentype ID
+    TEST_TYPE(IDENTIFIER); //ak je za id ( ,tak je to call /// je to ID flag = 1, neni to ID flag = 0
+    if(decisionFlag){
+        NEXT_TOKEN(activeToken);
+        TEST_TYPE(BRACKET_ROUND_OPEN);
+        if(decisionFlag){ // ak je to "(",tak vieme ze je to call
+            activeToken = savedTokenID;
+            CHECK_STATE(_call); ///potrebujem pri volani ID v activeToken
+        }else{ // ak to nie je "(", je to expression
+            activeToken = savedTokenAssign;
+            CHECK_STATE(expressions);
+        }
 
-    return 0;
+    }else{// ak to nie je id, je to urcite expression
+
+        activeToken = savedTokenAssign;
+        CHECK_STATE(expressions);
+    }
+
 }
 int _if(){
-//<if> -> if (<expression>) { $ <statements> } else { $ <statements>}
-    return 0;
+//<if> -> if <expression> { $ <body> } else { $ <body>}
+    CHECK_TYPE(KEYWORD_IF);
+    NEXT_TOKEN(activeToken);
+    CHECK_STATE(expression);
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(BRACKET_CURLY_OPEN);
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(EOL);
+    CHECK_STATE(body);
+    CHECK_TYPE(BRACKET_CURLY_CLOSE);
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(KEYWORD_ELSE);
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(BRACKET_CURLY_OPEN);
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(EOL);
+    CHECK_STATE(body);
+    CHECK_TYPE(BRACKET_CURLY_CLOSE);
+
 }
 int _for(){
-//<for> -> for (<definition> | <assignment> | eps ; <expression> ; <assignment> ) { $ <body> }
-    return 0;
+//<for> -> for  <definition> | <assignment> | eps ; <expression> ; <assignment>  { $ <body> }
+    CHECK_TYPE(KEYWORD_FOR);
+    NEXT_TOKEN(activeToken);
+    Token_t *savedToken = activeToken; // uloz ID / bodkociarku
+    TEST_TYPE(IDENTIFIER);
+    if(decisionFlag){
+        CHECK_TYPE(IDENTIFIER);
+        NEXT_TOKEN(activeToken);
+        TEST_TYPE(OPERATOR_DEFINE);
+        if(decisionFlag){
+            CHECK_TYPE(OPERATOR_DEFINE);
+            activeToken = savedToken;
+            CHECK_STATE(definition); // definition chce prve ID
+
+        }else{
+            activeToken = savedToken;                   // ID,ID,ID = //// ID:=
+            CHECK_STATE(assignment);
+
+        }
+    }
+    CHECK_TYPE(SEMICOLON); // eps
+    NEXT_TOKEN(activeToken);
+    CHECK_STATE(expression);
+    //predat expression ; ako $
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(SEMICOLON);
+    NEXT_TOKEN(activeToken);
+    CHECK_STATE(assignment);
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(BRACKET_CURLY_OPEN);
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(EOL);
+    CHECK_STATE(body);
+    CHECK_TYPE(BRACKET_CURLY_CLOSE);
+
 }
 int _call(){
 //<call> -> id(<params>)
-    return 0;
+    //NEXT_TOKEN(activeToken);
+    CHECK_TYPE(IDENTIFIER);
+    NEXT_TOKEN(activeToken);
+    CHECK_TYPE(BRACKET_ROUND_OPEN);
+    CHECK_STATE(params);
+    CHECK_TYPE(BRACKET_ROUND_CLOSE);
 
 }
 int _return(){
-//<return> -> return <expressions>
-    return 0;
+//<return> -> return <expressions> | eps
+    TEST_TYPE(BRACKET_CURLY_CLOSE);
+    DECIDE();//eps
+    CHECK_TYPE(KEYWORD_RETURN);//return 
+    NEXT_TOKEN(activeToken);
+    CHECK_STATE(expressions);
+    
 }
 int ids(){
 //<ids> -> id <ids_n>
-    
-    NEXT_TOKEN(activeToken);
     CHECK_TYPE(IDENTIFIER);
     CHECK_STATE(ids_n);
 
@@ -242,14 +361,24 @@ int ids_n(){
 
 int expressions(){
 //<expressions> -> <expression> <expression_n>
-    return 0;
+
+    CHECK_STATE(expression);
+    CHECK_STATE(expression_n);
 
 }
 int expression_n(){
 //<expression_n> -> , <expression> <expression_n> | eps
-    return 0;
+    TEST_TYPE(COMMA);
+    if(decisionFlag){
+        CHECK_TYPE(COMMA);
+        NEXT_TOKEN(activeToken);
+        CHECK_STATE(expression);
+        CHECK_STATE(expression_n);
+    }
+    return syntaxOK;
+    
 }
 //TODO parsovanie expressions
 int expression(){
-    return 0;
+    return syntaxOK;
 }
