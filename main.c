@@ -24,7 +24,7 @@ int main() {
     //debug
     Token_t* temp = LIST_HEAD;
     while (temp) {
-        printf("%s\n",(temp->type == EOL ? "EOL" : temp->value));
+        printf("%s\n",(temp->type == EOL ? "EOL" : temp->value->str));
         TOKEN_MOVE_NEXT(temp);
     }
 

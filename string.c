@@ -14,42 +14,71 @@ String_t* strCreate() {
         return NULL;
     }
 
-
+    tmp->str[0] = '\0';
+    tmp->len = 0;
 
     return tmp;
 }
 
 String_t* strAppendChar(String_t* s, char c) {
 
+    String_t* tmp = s;
     size_t len = 0;
-    if (s) len = strlen(s);
 
-    String_t* tmp = realloc(s, sizeof(size_t) + (len + 1) * sizeof(char));
-    if (!tmp) {
-        free(s);
+    if (tmp) {
+        len = tmp->len;
+    } else {
+        tmp = strCreate();
+    }
+
+    char* str = realloc(tmp->str, (len + 1) * sizeof(char));
+    if (!str) {
+        strDestroy(s);
         errorExit(internalError, "string : String allocation failed");
         return NULL;
     }
 
-    tmp[len] = c;
+    str[len] = c;
+
+    tmp->str = str;
+    tmp->len = len + 1;
 
     return tmp;
 }
 
-String_t* strAppendString(String_t* s, char* s1) {
+String_t* strAppendChars(String_t* s, char* s1) {
 
+    String_t* tmp = s;
     size_t len = 0, len1 = 0;
-    if (s) len = strlen(s);
-    if (s1) len1 = strlen(s1);
 
-    String_t* tmp = realloc(s, sizeof(size_t) + (len + len1) * sizeof(char));
-    if (!tmp) {
-        free(s);
+    if (tmp) {
+        len = tmp->len;
+    } else {
+        tmp = strCreate();
+    }
+
+    if (!s1) return tmp;
+    len1 = strlen(s1);
+
+    char* str = realloc(tmp->str, (len + len1) * sizeof(char));
+    if (!str) {
+        strDestroy(s);
         errorExit(internalError, "string : String allocation failed");
         return NULL;
     }
 
-    for (int i = 0; i < len1; i++) tmp[len+i] = s1[i];
+    for (size_t i = 0; i < len1; i++) str[len+i] = s1[i];
+
+    tmp->str = str;
+    tmp->len = len + len1;
 
     return tmp;
+}
+
+void strDestroy(String_t* s) {
+
+    if (s) free(s->str);
+    free(s);
+
+    return;
 }
