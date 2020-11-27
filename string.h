@@ -7,19 +7,22 @@
 #ifndef STRING_H
 #define STRING_H
 
+#include <string.h>
+#include <stdlib.h>
+
 typedef struct String {
     char* str;
     size_t len;
 } String_t;
 
-#include <string.h>
-#include <stdlib.h>
 #include "error.h"
 
 String_t* strCreate();
 
-String_t* strAppendChar(String_t s, char c);
+String_t* strAppendChar(String_t* s, char c);
 
-String_t* strAppendString(String_t s, String_t s1);
+String_t* strAppendChars(String_t* s, char* s1);
+
+void strDestroy(String_t* s);
 
 #endif // STRING_H
