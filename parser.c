@@ -11,11 +11,11 @@ int decisionFlag;
 #define syntaxOK  0
 #define CHECK_TYPE(TOKENTYPE) \
     if (activeToken->type != TOKENTYPE){ \
-        return syntaxError; \
+        errorExit(syntaxError,"parser: .... "); \
     }   \
 
 #define CHECK_EOF() \
-    if (activeToken == list.pTail) {return syntaxOK;}else{return syntaxError;} ///// treba tokentype EOF
+    if (activeToken == list.pTail) {return syntaxOK;}else{ errorExit(syntaxError, "No EOF");} ///// treba tokentype EOF
 
 #define TEST_TYPE(TOKENTYPE) \
     if (activeToken->type == TOKENTYPE){ \
@@ -30,7 +30,7 @@ int decisionFlag;
 
 #define CHECK_STATE(state) \
     if (state() == syntaxError){ \
-        return syntaxError;} \
+        errorExit(syntaxError, "....");} \
 
     
 
@@ -38,6 +38,8 @@ int decisionFlag;
 
 int parse(){
 
+    tHTable* globalSymTable;
+    htInit(globalSymTable);
     activeToken = list.pHead;
     CHECK_STATE(prog);
     return syntaxOK;
@@ -57,7 +59,7 @@ int prog(){
         return syntaxOK; //syntax ok
     
     }
-    return syntaxError;
+    errorExit(syntaxError, "in prog");
 }
 
 
@@ -122,10 +124,11 @@ int type(){
     DECIDE();
     TEST_TYPE(KEYWORD_STRING);
     DECIDE();
-    return syntaxError;
+    errorExit(syntaxError, "in type");
 
 }
 int params_n(){
+
     //<params_n> -> , id <type> <params_n> | eps
     TEST_TYPE(BRACKET_ROUND_CLOSE);
     DECIDE();

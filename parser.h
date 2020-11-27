@@ -13,7 +13,7 @@
 #include "string.h"
 #include "resources.h"
 #include "error.h"
-//#include "symtable.h"
+#include "symtable.h"
 
 int parse();//
 int prog();//
@@ -39,5 +39,7 @@ int _if();//
 int _for();
 int _call();//
 int _return();//
+////////////AST\\\\\\\\\\\\\
+
 
 #endif
