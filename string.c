@@ -6,79 +6,44 @@
 
 #include "string.h"
 
-String_t* strCreate() {
+void strClear(String_t *s) {
 
-    String_t* tmp = malloc(sizeof(String_t));
-    if (!tmp) {
-        errorExit(internalError, "string : String allocation failed");
-        return NULL;
-    }
+    s->str = NULL;
+    s->len = 0;
 
-    tmp->str[0] = '\0';
-    tmp->len = 0;
-
-    return tmp;
+    return;
 }
 
-String_t* strAppendChar(String_t* s, char c) {
+void strIncreaseSize(String_t* s) {
 
-    String_t* tmp = s;
-    size_t len = 0;
+    s->str = realloc(s->str, (s->len % STR_ALLOC_INC ? s->len / STR_ALLOC_INC : (s->len / STR_ALLOC_INC) + 1));
+    if (!(s->str)) errorExit(internalError, "string : String allocation failed");
 
-    if (tmp) {
-        len = tmp->len;
-    } else {
-        tmp = strCreate();
-    }
-
-    char* str = realloc(tmp->str, (len + 1) * sizeof(char));
-    if (!str) {
-        strDestroy(s);
-        errorExit(internalError, "string : String allocation failed");
-        return NULL;
-    }
-
-    str[len] = c;
-
-    tmp->str = str;
-    tmp->len = len + 1;
-
-    return tmp;
+    return;
 }
 
-String_t* strAppendChars(String_t* s, char* s1) {
+void strAppendChar(String_t* s, char c) {
 
-    String_t* tmp = s;
-    size_t len = 0, len1 = 0;
+    if (!(s->len % STR_ALLOC_INC)) strIncreaseSize(s);
 
-    if (tmp) {
-        len = tmp->len;
-    } else {
-        tmp = strCreate();
-    }
+    s->str[s->len] = c;
+    s->len += 1;
 
-    if (!s1) return tmp;
-    len1 = strlen(s1);
+    return;
+}
 
-    char* str = realloc(tmp->str, (len + len1) * sizeof(char));
-    if (!str) {
-        strDestroy(s);
-        errorExit(internalError, "string : String allocation failed");
-        return NULL;
-    }
+void strAppendChars(String_t* s, char* cs) {
 
-    for (size_t i = 0; i < len1; i++) str[len+i] = s1[i];
+    size_t len = strlen(cs);
 
-    tmp->str = str;
-    tmp->len = len + len1;
+    for (size_t i = 0; i < len; i++) strAppendChar(s, cs[i]);
 
-    return tmp;
+    return;
 }
 
 void strDestroy(String_t* s) {
 
-    if (s) free(s->str);
-    free(s);
+    free(s->str);
 
     return;
 }

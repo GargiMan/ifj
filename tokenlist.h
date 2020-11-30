@@ -8,14 +8,13 @@
 #define TOKENLIST_H
 
 #include <stdlib.h>
-#include "string.h"
 #include "error.h"
 
 //token structure
 
 typedef enum TokenType {
     EOL = 0,                    // EOL
-    IDENTIFIER,                 // id
+    ID,                         // id
     DATA_INT,                   // int data
     DATA_FLOAT64,               // float data
     DATA_STRING,                // string data
@@ -51,8 +50,7 @@ typedef enum TokenType {
     COMMA,                      // ,
 } TokenType_t;
 
-typedef String_t* TokenValue_t;
-
+typedef char* TokenValue_t;
 typedef struct Token Token_t;
 
 struct Token {
