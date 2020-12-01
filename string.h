@@ -9,19 +9,22 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include "error.h"
+
+#define STR_ALLOC_INC 4
 
 typedef struct String {
     char* str;
     size_t len;
 } String_t;
 
-#include "error.h"
+void strClear(String_t *s);
 
-String_t* strCreate();
+void strIncreaseSize(String_t* s);
 
-String_t* strAppendChar(String_t* s, char c);
+void strAppendChar(String_t* s, char c);
 
-String_t* strAppendChars(String_t* s, char* s1);
+void strAppendChars(String_t* s, char* cs);
 
 void strDestroy(String_t* s);
 
