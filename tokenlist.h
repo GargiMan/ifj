@@ -13,7 +13,7 @@
 //token structure
 
 typedef enum TokenType {
-    EOL = 0,                    // EOL
+    EOL = 0,                    // end of line
     ID,                         // id
     DATA_INT,                   // int data
     DATA_FLOAT64,               // float data
@@ -79,6 +79,7 @@ extern List_t list;
 #define TOKEN_SET_NEXT(token, next) (TOKEN_NEXT(token) = next)
 
 #define TOKEN_CREATE(token) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
+#define TOKEN_CREATE_WT(token, type) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_TYPE(token, type); TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
 #define TOKEN_MOVE_NEXT(token) (token = TOKEN_NEXT(token))
 #define TOKEN_IS_TYPE(token, type) (TOKEN_TYPE(token) == type)
 #define TOKEN_DESTROY(token) do { free(token->value); free(token); } while (0)
@@ -91,6 +92,7 @@ extern List_t list;
 #define LIST_IS_EMPTY (!LIST_HEAD)
 
 #define LIST_ADD_TOKEN(token) do { if (LIST_IS_EMPTY) {LIST_HEAD = token; LIST_TAIL = token;} else {TOKEN_SET_NEXT(LIST_TAIL, token); LIST_TAIL = token;}} while (0)
+#define LIST_ADD_TOKEN_WT(token, type) do { TOKEN_CREATE_WT(token, type); if (LIST_IS_EMPTY) {LIST_HEAD = token; LIST_TAIL = token;} else {TOKEN_SET_NEXT(LIST_TAIL, token); LIST_TAIL = token;}} while (0)
 #define LIST_CLEAR while (!LIST_IS_EMPTY) {LIST_TAIL = TOKEN_NEXT(LIST_HEAD); TOKEN_DESTROY(LIST_HEAD); LIST_HEAD = LIST_TAIL;}
 
 #endif // TOKENLIST_H

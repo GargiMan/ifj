@@ -14,7 +14,7 @@
 
 #define IS_EOF(c) (c == EOF)
 #define IS_EOL(c) (c == '\n' || c == '\r')
-#define IS_NOT_TERM(c) (c == EOF || c == ' ' || c == '\t' || c == '\0')
+#define IS_NOT_TERM(c) (c == ' ' || c == '\t' || c == '\0')
 #define IS_NUMBER(c) (c > 47 && c < 58) // 0-9
 #define IS_NUMBER_HEX(c) ((c > 47 && c < 58) || (c > 64 && c < 71) || (c > 96 && c < 103))
 #define IS_APLHA(c) ((c > 64 && c < 91) || (c > 96 && c < 123)) // a-z || A-Z
@@ -23,6 +23,24 @@
 #define IS_DOT(c) (c == '.')
 #define IS_EXPONENT(c) (c == 'e' || c == 'E')
 #define IS_ZERO_CHAR(c) (c == '0')
+
+#define IS_COLON(c) (c == ':')
+#define IS_SEMICOLON(c) (c == ';')
+#define IS_COMMA(c) (c == ',')
+#define IS_MINUS(c) (c == '-')
+#define IS_PLUS(c) (c == '+')
+#define IS_SLASH(c) (c == '/')
+#define IS_ASTERISK(c) (c == '*')
+#define IS_AMPERSAND(c) (c == '&')
+#define IS_VERTICAL_BAR(c) (c == '|')
+#define IS_EXCLAMATION(c) (c == '!')
+#define IS_EQUALS(c) (c == '=')
+#define IS_LESS(c) (c == '<')
+#define IS_GREATER(c) (c == '>')
+#define IS_ROUND_OPEN(c) (c == '(')
+#define IS_ROUND_CLOSE(c) (c == ')')
+#define IS_CURLY_OPEN(c) (c == '{')
+#define IS_CURLY_CLOSE(c) (c == '}')
 
 #define KW_INT(s) (!strcmp("int", s))
 #define KW_FLOAT64(s) (!strcmp("float64", s))
