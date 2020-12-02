@@ -6,20 +6,51 @@
 
 #include "string.h"
 
-String_t appendChar(String_t s, char c) {
+void strClear(String_t *s) {
 
-    size_t len = 0;
-    if (s) len = strlen(s);
+    s->str = NULL;
+    s->len = 0;
 
-    String_t tmp = realloc(s, (len + 1) * sizeof(char));
-    if (!tmp) {
-        free(s);
-        errorExit(internalError, "string.h : Char allocation failed");
-        return NULL;
-    }
-
-    tmp[len] = c;
-
-    return tmp;
+    return;
 }
 
+int strIsFull(String_t* s) {
+
+    return ((s->len % STR_ALLOC_INC) == 0);
+}
+
+void strIncreaseSize(String_t* s) {
+
+    s->str = realloc(s->str, sizeof(char) * ((s->len / STR_ALLOC_INC) + STR_ALLOC_INC));
+    if (!(s->str)) errorExit(internalError, "string : String allocation failed");
+
+    return;
+}
+
+void strAppendChar(String_t* s, char c) {
+
+    //printf("%ld/%ld\n", s->len, sizeof(char) * ((s->len / STR_ALLOC_INC) + STR_ALLOC_INC));
+
+    if (strIsFull(s)) strIncreaseSize(s);
+
+    s->str[s->len] = c;
+    s->len++;
+
+    return;
+}
+
+void strAppendChars(String_t* s, char* cs) {
+
+    size_t len = strlen(cs);
+
+    for (size_t i = 0; i < len; i++) strAppendChar(s, cs[i]);
+
+    return;
+}
+
+void strDestroy(String_t* s) {
+
+    free(s->str);
+
+    return;
+}

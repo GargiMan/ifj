@@ -4,39 +4,114 @@
  * @brief IFJ20 Compiler
  */
 
-#include <stdlib.h>
 #include <stdio.h>
-#include "list.h"
+#include "tokenlist.h"
 #include "scanner.h"
 #include "error.h"
+#include "resources.h"
+
+//#define DEBUG 1     //uncomment for debug info
+
+char* rtrType(TokenType_t type);
 
 //token list
-LList_t list = {NULL, NULL};
+List_t list = {NULL, NULL};
 
-int main(int argc, char* argv[]) {
+int main() {
 
-    //input select
-    FILE* fd = stdin;
-    if (argc == 2) fd = fopen(argv[1],"r");
-    if (!fd) {
-        errorExit(internalError, "File descriptor is incorrect\n");
-        return 1;
-    }
+    //scanner
+    getTokens();
 
-    //read
-    readFile(fd);
+    //parser
 
-    //print
-    LListItem_t* temp = LIST_HEAD;
+
+
+
+    //debug
+    #ifdef DEBUG
+    Token_t* temp = LIST_HEAD;
     while (temp) {
-        printf("%s\n",temp->token);
-        temp = ITEM_NEXT(temp);
+        if (temp->type == ID || temp->type == DATA_STRING || temp->type == DATA_INT || temp->type == DATA_FLOAT64) {
+            printf("%d\t | %s\n", temp->type, temp->value);
+        } else {
+            printf("%d\t | %s\n", temp->type, rtrType(temp->type));
+        }
+        
+        TOKEN_MOVE_NEXT(temp);
     }
+    #endif
 
-    //free resources
-    LIST_CLEAR;
-    fclose(fd);
-
+    FREE_RESOURCES;
 
     return 0;
+}
+
+
+char* rtrType(TokenType_t type) {
+    switch (type) {
+        case EOL:
+            return "EOL";
+        case KEYWORD_INT:
+            return "int";
+        case KEYWORD_FLOAT64:
+            return "float64";
+        case KEYWORD_STRING:
+            return "string";
+        case KEYWORD_IF:
+            return "if";
+        case KEYWORD_ELSE:
+            return "else";
+        case KEYWORD_FOR:
+            return "for";
+        case KEYWORD_FUNC:
+            return "func";
+        case KEYWORD_RETURN:
+            return "return";
+        case KEYWORD_PACKAGE:
+            return "package";
+        case OPERATOR_DEFINE:
+            return ":=";
+        case OPERATOR_ASSIGN:
+            return "=";
+        case OPERATOR_PLUS:
+            return "+";
+        case OPERATOR_MINUS:
+            return "-";
+        case OPERATOR_MUL:
+            return "*";
+        case OPERATOR_DIV:
+            return "/";
+        case OPERATOR_AND:
+            return "&&";
+        case OPERATOR_OR:
+            return "||";
+        case OPERATOR_NOT:
+            return "!";
+        case OPERATOR_NOT_EQUAL:
+            return "!=";
+        case OPERATOR_EQUAL:
+            return "==";
+        case OPERATOR_GREATER:
+            return ">";
+        case OPERATOR_GREATER_OR_EQUAL:
+            return ">=";
+        case OPERATOR_LESS:
+            return "<";
+        case OPERATOR_LESS_OR_EQUAL:
+            return "<=";
+        case BRACKET_ROUND_OPEN:
+            return "(";
+        case BRACKET_ROUND_CLOSE:
+            return ")";
+        case BRACKET_CURLY_OPEN:
+            return "{";
+        case BRACKET_CURLY_CLOSE:
+            return "}";
+        case SEMICOLON:
+            return ";";
+        case COMMA:
+            return ",";
+        default:
+            return NULL;
+    }
 }
