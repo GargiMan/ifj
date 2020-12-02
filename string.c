@@ -14,9 +14,14 @@ void strClear(String_t *s) {
     return;
 }
 
+int strIsFull(String_t* s) {
+
+    return ((s->len % STR_ALLOC_INC) == 0);
+}
+
 void strIncreaseSize(String_t* s) {
 
-    s->str = realloc(s->str, (s->len % STR_ALLOC_INC ? s->len / STR_ALLOC_INC : (s->len / STR_ALLOC_INC) + 1));
+    s->str = realloc(s->str, sizeof(char) * ((s->len / STR_ALLOC_INC) + STR_ALLOC_INC));
     if (!(s->str)) errorExit(internalError, "string : String allocation failed");
 
     return;
@@ -24,10 +29,12 @@ void strIncreaseSize(String_t* s) {
 
 void strAppendChar(String_t* s, char c) {
 
-    if (!(s->len % STR_ALLOC_INC)) strIncreaseSize(s);
+    //printf("%ld/%ld\n", s->len, sizeof(char) * ((s->len / STR_ALLOC_INC) + STR_ALLOC_INC));
+
+    if (strIsFull(s)) strIncreaseSize(s);
 
     s->str[s->len] = c;
-    s->len += 1;
+    s->len++;
 
     return;
 }

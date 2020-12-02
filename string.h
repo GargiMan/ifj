@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include "error.h"
 
-#define STR_ALLOC_INC 4
+#define STR_ALLOC_INC 1
 
 typedef struct String {
     char* str;
@@ -19,6 +19,8 @@ typedef struct String {
 } String_t;
 
 void strClear(String_t *s);
+
+int strIsFull(String_t* s);
 
 void strIncreaseSize(String_t* s);
 
