@@ -195,6 +195,15 @@ void getTokens() {
                         strAppendChar(&string, c);
                     }
 
+                } else if (IS_PLUS(c) || IS_MINUS(c)) {
+
+                    if (!(state & 2) && !IS_EXPONENT(string.str[string.len - 1])) {     //plus or minus not after exponent
+                        strDestroy(&string);
+                        errorExit(lexicalError, "scanner : Plus or minus character inside number can be only before exponent\n");
+                    }
+
+                    strAppendChar(&string, c);
+
                 } else if (IS_NUMBER(c)) {
 
                     strAppendChar(&string, c);
@@ -204,10 +213,13 @@ void getTokens() {
                         errorExit(lexicalError, "scanner : Redundant zeroes at beginning of number value\n");
                     }
 
-                    if (IS_EXPONENT(string.str[string.len - 1]) && IS_ZERO_CHAR(c)) {   //zero after exponent
+                    if (string.len > 3 && IS_EXPONENT(string.str[string.len - 3]) && IS_ZERO_CHAR(string.str[string.len - 2]) && IS_NUMBER(string.str[string.len - 1])) {   //zero after exponent
                         strDestroy(&string);
                         errorExit(lexicalError, "scanner : Redundant zeroes at beginning of exponent value\n");
-                    } 
+                    } else if (string.len > 4 && IS_EXPONENT(string.str[string.len - 4]) && (IS_PLUS(string.str[string.len - 3]) || IS_MINUS(string.str[string.len - 3])) && IS_ZERO_CHAR(string.str[string.len - 2]) && IS_NUMBER(string.str[string.len - 1])) {
+                        strDestroy(&string);
+                        errorExit(lexicalError, "scanner : Redundant zeroes at beginning of exponent value\n");
+                    }
                     
                 } else {
                     ungetc(c, stdin);
