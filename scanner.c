@@ -158,6 +158,7 @@ void getTokens() {
             strClear(&string);
             strAppendChar(&string, c);
             int state = 0; //0 int , 1 float64 , 2 int exponent , 3 float64 exponent
+            int expsignset = 0; //0 - unset , 1 - set
 
             while ((c = getchar())) {
 
@@ -198,12 +199,20 @@ void getTokens() {
 
                 } else if (IS_PLUS(c) || IS_MINUS(c)) {
 
-                    if (!(state & 2) && !IS_EXPONENT(string.str[string.len - 1])) {     //plus or minus not after exponent
+                    //needs fix
+
+                    if (!(expsignset) && (state & 2) && IS_EXPONENT(string.str[string.len - 1])) {     //plus or minus not after exponent
+                        strAppendChar(&string, c);
+                        expsignset = 1;
+                    } else if (expsignset || !IS_EXPONENT(string.str[string.len - 1])) {
                         ungetc(c, stdin);
                         break;
+                    } else {
+                        strDestroy(&string);
+                        errorExit(lexicalError, "scanner : Plus or minus character inside number can be only before exponent\n");
                     }
 
-                    strAppendChar(&string, c);
+                    
 
                 } else if (IS_NUMBER(c)) {
 
@@ -238,7 +247,7 @@ void getTokens() {
                 errorExit(lexicalError, "scanner : Redundant zeroes at end of float number value\n");
             }
 
-            if ((state & 2) && IS_EXPONENT(string.str[string.len - 1])) {
+            if ((state & 2) && (IS_EXPONENT(string.str[string.len - 1]) || IS_PLUS(string.str[string.len - 1]) || IS_MINUS(string.str[string.len - 1]))) {
                 strDestroy(&string);
                 errorExit(lexicalError, "scanner : Number with exponent is missing exponent value\n");
             }
