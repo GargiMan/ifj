@@ -259,17 +259,26 @@ void getTokens() {
                 strAppendChar(&string, c);
 
                 //check for keyword
-                if (string.len > 1 && string.len < 5) {
-                    if (KW_IF(string.str)) TOKEN_SET_TYPE(token, KEYWORD_IF);
-                    else if (KW_INT(string.str)) TOKEN_SET_TYPE(token, KEYWORD_INT);
-                    else if (KW_FOR(string.str)) TOKEN_SET_TYPE(token, KEYWORD_FOR);
-                    else if (KW_ELSE(string.str)) TOKEN_SET_TYPE(token, KEYWORD_ELSE);
-                    else if (KW_FUNC(string.str)) TOKEN_SET_TYPE(token, KEYWORD_FUNC);
-                } else if (string.len > 5 && string.len < 8) {
-                    if (KW_RETURN(string.str)) TOKEN_SET_TYPE(token, KEYWORD_RETURN);
-                    else if (KW_STRING(string.str)) TOKEN_SET_TYPE(token, KEYWORD_STRING);
-                    else if (KW_FLOAT64(string.str)) TOKEN_SET_TYPE(token, KEYWORD_FLOAT64);
-                    else if (KW_PACKAGE(string.str)) TOKEN_SET_TYPE(token, KEYWORD_PACKAGE);
+                switch (string.len) {
+                    case 2:
+                        if (KW_IF(string.str)) TOKEN_SET_TYPE(token, KEYWORD_IF);
+                        break;
+                    case 3:
+                        if (KW_INT(string.str)) TOKEN_SET_TYPE(token, KEYWORD_INT);
+                        else if (KW_FOR(string.str)) TOKEN_SET_TYPE(token, KEYWORD_FOR);
+                        break;
+                    case 4:
+                        if (KW_ELSE(string.str)) TOKEN_SET_TYPE(token, KEYWORD_ELSE);
+                        else if (KW_FUNC(string.str)) TOKEN_SET_TYPE(token, KEYWORD_FUNC);
+                        break;
+                    case 6:
+                        if (KW_RETURN(string.str)) TOKEN_SET_TYPE(token, KEYWORD_RETURN);
+                        else if (KW_STRING(string.str)) TOKEN_SET_TYPE(token, KEYWORD_STRING);
+                        break;
+                    case 7:
+                        if (KW_FLOAT64(string.str)) TOKEN_SET_TYPE(token, KEYWORD_FLOAT64);
+                        else if (KW_PACKAGE(string.str)) TOKEN_SET_TYPE(token, KEYWORD_PACKAGE);
+                        break;
                 }
             }
 

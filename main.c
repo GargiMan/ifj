@@ -4,13 +4,13 @@
  * @brief IFJ20 Compiler
  */
 
+//#define DEBUG 1     //uncomment for debug info
+
 #include <stdio.h>
 #include "tokenlist.h"
 #include "scanner.h"
 #include "error.h"
 #include "resources.h"
-
-//#define DEBUG 1     //uncomment for debug info
 
 char* rtrType(TokenType_t type);
 
