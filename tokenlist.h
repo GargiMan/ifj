@@ -13,41 +13,41 @@
 //token structure
 
 typedef enum TokenType {
-    EOL = 0,                    // end of line
-    ID,                         // id
-    DATA_INT,                   // int data
-    DATA_FLOAT64,               // float data
-    DATA_STRING,                // string data
-    KEYWORD_INT,                // int
-    KEYWORD_FLOAT64,            // float64
-    KEYWORD_STRING,             // string
-    KEYWORD_IF,                 // if
-    KEYWORD_ELSE,               // else
-    KEYWORD_FOR,                // for
-    KEYWORD_FUNC,               // func
-    KEYWORD_RETURN,             // return
-    KEYWORD_PACKAGE,            // package
-    OPERATOR_DEFINE,            // :=
-    OPERATOR_ASSIGN,            // =
-    OPERATOR_PLUS,              // +
-    OPERATOR_MINUS,             // -
-    OPERATOR_MUL,               // *
-    OPERATOR_DIV,               // /
-    OPERATOR_AND,               // &&
-    OPERATOR_OR,                // ||
-    OPERATOR_NOT,               // !
-    OPERATOR_NOT_EQUAL,         // !=
-    OPERATOR_EQUAL,             // ==
-    OPERATOR_GREATER,           // >
-    OPERATOR_GREATER_OR_EQUAL,  // >=
-    OPERATOR_LESS,              // <
-    OPERATOR_LESS_OR_EQUAL,     // <=
-    BRACKET_ROUND_OPEN,         // (
-    BRACKET_ROUND_CLOSE,        // )
-    BRACKET_CURLY_OPEN,         // {
-    BRACKET_CURLY_CLOSE,        // }
-    SEMICOLON,                  // ;
-    COMMA,                      // ,
+    EOL = 0,                    // 0 end of line
+    ID,                         // 1 id
+    DATA_INT,                   // 2 int data
+    DATA_FLOAT64,               // 3 float data
+    DATA_STRING,                // 4 string data
+    KEYWORD_INT = 10,           // 10 int
+    KEYWORD_FLOAT64,            // 11 float64
+    KEYWORD_STRING,             // 12 string
+    KEYWORD_IF,                 // 13 if
+    KEYWORD_ELSE,               // 14 else
+    KEYWORD_FOR,                // 15 for
+    KEYWORD_FUNC,               // 16 func
+    KEYWORD_RETURN,             // 17 return
+    KEYWORD_PACKAGE,            // 18 package
+    OPERATOR_DEFINE = 20,       // 20 :=
+    OPERATOR_ASSIGN,            // 21 =
+    OPERATOR_PLUS,              // 22 +
+    OPERATOR_MINUS,             // 23 -
+    OPERATOR_MUL,               // 24 *
+    OPERATOR_DIV,               // 25 /
+    OPERATOR_AND,               // 26 &&
+    OPERATOR_OR,                // 27 ||
+    OPERATOR_NOT,               // 28 !
+    OPERATOR_NOT_EQUAL,         // 29 !=
+    OPERATOR_EQUAL,             // 30 ==
+    OPERATOR_GREATER,           // 31 >
+    OPERATOR_GREATER_OR_EQUAL,  // 32 >=
+    OPERATOR_LESS,              // 33 <
+    OPERATOR_LESS_OR_EQUAL,     // 34 <=
+    BRACKET_ROUND_OPEN = 40,    // 40 (
+    BRACKET_ROUND_CLOSE,        // 41 )
+    BRACKET_CURLY_OPEN,         // 42 {
+    BRACKET_CURLY_CLOSE,        // 43 }
+    SEMICOLON,                  // 44 ;
+    COMMA,                      // 45,
 } TokenType_t;
 
 typedef char* TokenValue_t;
