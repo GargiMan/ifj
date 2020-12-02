@@ -199,8 +199,8 @@ void getTokens() {
                 } else if (IS_PLUS(c) || IS_MINUS(c)) {
 
                     if (!(state & 2) && !IS_EXPONENT(string.str[string.len - 1])) {     //plus or minus not after exponent
-                        strDestroy(&string);
-                        errorExit(lexicalError, "scanner : Plus or minus character inside number can be only before exponent\n");
+                        ungetc(c, stdin);
+                        break;
                     }
 
                     strAppendChar(&string, c);
