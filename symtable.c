@@ -14,7 +14,7 @@ int solved;
 ** volena s ohledem na maximální kvalitu výsledku). }
 */
 
-int hashCode ( tKey key ) {
+int hashCode (const char* key ) {
 	int retval = 1;
 	int keylen = strlen(key);
 	for ( int i=0; i<keylen; i++ )
@@ -29,7 +29,7 @@ int hashCode ( tKey key ) {
 
 void htInit ( tHTable* ptrht ) {
 
- if(!ptrht){
+ 	if(!ptrht){
 
 		return;
 	}
@@ -43,9 +43,9 @@ void htInit ( tHTable* ptrht ) {
 **
 */
 
-tHTItem* htSearch ( tHTable* ptrht, tKey key ) {
+tHTItem* htSearch ( tHTable* ptrht,const char* key ) {
 
- if(!ptrht || !(*ptrht)){
+    if(!ptrht || !(*ptrht)){
 	  	return NULL;
 	}
 	tHTItem* tmp = (*ptrht)[hashCode(key)];
@@ -70,27 +70,33 @@ tHTItem* htSearch ( tHTable* ptrht, tKey key ) {
 ** tedy proveďte.vložení prvku na začátek seznamu.
 **/
 
-void htInsert ( tHTable* ptrht, tKey key, tData data ) {
+void htInsert ( tHTable* ptrht,const char* key, tData *data , int Data_type ) {
 
  	if(!ptrht){
 	  	return;
  	}
 	tHTItem* tmp = htSearch(ptrht,key);
 	if(tmp){
-	  	tmp->data = data;
+		//ak uz existuje v danej tabulke,tak chyba
+	  	//return 1;
 	}
 	else{
+
 	  	tmp = (*ptrht)[hashCode(key)];
 	  	tHTItem* newItem = malloc(sizeof(struct tHTItem));
 		if (!newItem){
-			return;
+			//return;
 		}
 
 		newItem->key = key;
-		newItem->data = data;
+		newItem->data->global = data->global;
+		newItem->data->identifier = data->identifier;
+		newItem->data->type = data->type;
+		newItem->data->params = data->params;
+		newItem->data->defined = data->defined;
 		(*ptrht)[hashCode(key)] = newItem;
 		newItem->ptrnext = tmp;
-
+		//return 0;
 	}
 }
 
@@ -103,7 +109,7 @@ void htInsert ( tHTable* ptrht, tKey key, tData data ) {
 ** Využijte dříve vytvořenou funkci HTSearch.
 */
 
-tData* htRead ( tHTable* ptrht, tKey key ) {
+tData* htRead ( tHTable* ptrht,const char* key ) {
 
 	if(!ptrht){
 	  	return NULL;
@@ -128,7 +134,7 @@ tData* htRead ( tHTable* ptrht, tKey key ) {
 ** V tomto případě NEVYUŽÍVEJTE dříve vytvořenou funkci HTSearch.
 */
 
-void htDelete ( tHTable* ptrht, tKey key ) {
+void htDelete ( tHTable* ptrht,const char* key ) {
 
  	if(!ptrht || !(*ptrht)){
 	  	return;

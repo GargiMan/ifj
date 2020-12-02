@@ -9,10 +9,11 @@
 #define __SYMTABLE_H__
 
 #include <stdlib.h>
-#include <string.h>     // size_t
+#include "string.h"    // size_t
 #include <stdbool.h>    // bool
 #define MAX_HTSIZE 101
 #include "error.h"
+#include "parser.h"
 
 typedef enum
 {
@@ -28,20 +29,20 @@ typedef struct
 {
   Data_type type;  
   bool defined;
-  String_t value;
-  char *identifier;
+  String_t *params;
+  char* identifier;
   bool global;
 
 } tData;
 
 /* typ klíče (například identifikace zboží) */
-typedef char* tKey;
+//typedef char* tKey;
 
 
 /*Datová položka TRP s explicitně řetězenými synonymy*/
  typedef struct tHTItem{
-	tKey key;				/* klíč  */
-	tData data;				/* obsah */
+	const char* key;				/* klíč  */
+	tData *data;				/* obsah */
 	struct tHTItem* ptrnext;	/* ukazatel na další synonymum */
 } tHTItem;
 
@@ -60,17 +61,17 @@ extern int HTSIZE;
 
 /* Hlavičky řešených procedur a funkcí. */
 
-int hashCode ( tKey key );
+int hashCode (const char* key );
 
 void htInit ( tHTable* ptrht );
 
-tHTItem* htSearch ( tHTable* ptrht, tKey key );
+tHTItem* htSearch ( tHTable* ptrht, const char* key );
 
-void htInsert ( tHTable* ptrht, tKey key, tData data );
+void htInsert ( tHTable* ptrht,const char* key, tData *data ,int Data_type);
 
-tData* htRead ( tHTable* ptrht, tKey key );
+tData* htRead ( tHTable* ptrht,const char* key );
 
-void htDelete ( tHTable* ptrht, tKey key );
+void htDelete ( tHTable* ptrht,const char* key );
 
 void htClearAll ( tHTable* ptrht );
 #endif // __SYMTABLE_H__
