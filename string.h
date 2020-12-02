@@ -4,15 +4,30 @@
  * @brief IFJ20 - Header for operations over string
  */
 
-#ifndef __STRING_H__
-#define __STRING_H__
+#ifndef STRING_H
+#define STRING_H
 
 #include <string.h>
 #include <stdlib.h>
 #include "error.h"
 
-typedef char* String_t;
+#define STR_ALLOC_INC 1
 
-String_t appendChar(String_t s, char c);
+typedef struct String {
+    char* str;
+    size_t len;
+} String_t;
 
-#endif // __STRING_H__
+void strClear(String_t *s);
+
+int strIsFull(String_t* s);
+
+void strIncreaseSize(String_t* s);
+
+void strAppendChar(String_t* s, char c);
+
+void strAppendChars(String_t* s, char* cs);
+
+void strDestroy(String_t* s);
+
+#endif // STRING_H
