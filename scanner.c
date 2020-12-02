@@ -18,6 +18,7 @@ void getTokens() {
             continue;
 
         } else if (IS_EOL(c)) {                         //eol
+            if (token != NULL && TOKEN_TYPE(token) == EOL) continue;
             LIST_ADD_TOKEN_WT(token, EOL);
 
         } else if (IS_COLON(c)) {                       //define
