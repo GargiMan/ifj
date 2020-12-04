@@ -42,11 +42,16 @@
     if (state() == syntaxError){ \
         errorExit(syntaxError, "....\n");} \
 
+#define SET_FLAG(flag)(flag = 1) \
+
+#define GET_NEXT(token) if(token->pNext == NULL){errorExit(syntaxError, "Function with no ending\n");}else{(token = TOKEN_NEXT(token));}
+
     
 Token_t *Token;
 int decisionFlag;
 char* funcName;
-int inFunction;
+int returnFlag;
+
 int parse();//
 int prog();//
 int exec();//

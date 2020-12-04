@@ -15,12 +15,14 @@ int parse(){
 
 int prog(){
 
+   if(Token->type == EOL){
+       GET_NEXT(Token); // ak je EOL pred package
+   }
    CHECK_TYPE(KEYWORD_PACKAGE); 
-   TOKEN_MOVE_NEXT(Token);
+   GET_NEXT(Token);
    CHECK_TYPE(ID);
     if(!strcmp("main",Token->value)){
-
-        TOKEN_MOVE_NEXT(Token);
+        GET_NEXT(Token);
         CHECK_TYPE(EOL);
         exec();
         return syntaxOK; 
@@ -39,29 +41,31 @@ int exec(){
 }
 int func(){
 
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_TYPE(KEYWORD_FUNC);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_TYPE(ID);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     params(); 
-    TOKEN_MOVE_NEXT(Token);
-    func_types(); //ACT {
+    GET_NEXT(Token);
+    func_types(); //ACT { (
     //TOKEN_MOVE_NEXT(Token);
+    printf("func types ok\n");
     body();
     return syntaxOK;
 }
+
 int params(){
     
     if(Token->type == BRACKET_ROUND_CLOSE){
         return syntaxOK;  // no params
     }
     CHECK_TYPE(ID);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     type();
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     params_n();
 }
 
@@ -75,35 +79,45 @@ int type(){
         case KEYWORD_STRING:
             break;
         default:
-            return syntaxError;
+            errorExit(syntaxError,"in type\n");
     }
 
 }
 int params_n(){
 
     if(Token->type == BRACKET_ROUND_CLOSE){
+        printf("closed\n");
         return syntaxOK;  // no more params
     }
     CHECK_TYPE(COMMA);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_TYPE(ID);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     type();
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     params_n();
 
 }
 int func_types(){
-
-   if(Token->type == BRACKET_CURLY_OPEN){
-        return syntaxOK;  // no return types
+    if(Token->type == BRACKET_CURLY_OPEN){
+        printf("no return types\n");
+        return syntaxOK;  // no return types && no brackets
     }
+
+    if(Token->type == BRACKET_ROUND_OPEN && Token->pNext->type == BRACKET_ROUND_CLOSE){
+        GET_NEXT(Token);
+        printf("no return types\n"); // no return types && brackets
+        return syntaxOK;
+    }
+    printf("xds\n");
    CHECK_TYPE(BRACKET_ROUND_OPEN);
-   TOKEN_MOVE_NEXT(Token);
+   printf("xds\n");
+   GET_NEXT(Token);
+   //SET_FLAG(returnFlag);
    type();
-   TOKEN_MOVE_NEXT(Token);
+   GET_NEXT(Token);
    types_n();
-   TOKEN_MOVE_NEXT(Token);
+   GET_NEXT(Token);
 }
 int types_n(){
 
@@ -111,16 +125,16 @@ int types_n(){
         return syntaxOK;  // no return types
     }
     CHECK_TYPE(COMMA);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     type();
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     types_n();
 }
 int func_n(){
 //<func_n> -> $ <func> <func_n> | eps //ak uz nie su dalsie funkcie tak je EOF
     printf("func_n\n");
     TEST_EOF();
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     TEST_EOF();
     TEST_TYPE(EOL);
     if (decisionFlag){
@@ -138,7 +152,7 @@ int body(){
     printf("bodyyy\n");
     CHECK_TYPE(BRACKET_CURLY_OPEN);
     printf("curly open pohoda\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     statement();
     printf("skok zo statement\n");
     if(Token->type == BRACKET_CURLY_CLOSE){
@@ -151,16 +165,16 @@ int statement(){
 
     CHECK_TYPE(EOL);
     printf("EOL\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     Token_t *savedToken = Token; 
 
     if(Token->type == ID){
-        TOKEN_MOVE_NEXT(Token);
+        GET_NEXT(Token);
         switch(Token->type){
             case BRACKET_ROUND_OPEN: 
                 Token = savedToken;
                 _call();
-                TOKEN_MOVE_NEXT(Token);
+                GET_NEXT(Token);
                 break;
 
             case OPERATOR_DEFINE: 
@@ -182,19 +196,19 @@ int statement(){
     switch(Token->type){
         case KEYWORD_IF: 
                 _if();
-                TOKEN_MOVE_NEXT(Token);
+                GET_NEXT(Token);
                 break;
 
         case KEYWORD_FOR: 
                 _for();
-                TOKEN_MOVE_NEXT(Token);
+                GET_NEXT(Token);
                 break;
         
         case KEYWORD_RETURN: 
                 printf("skok do returnu\n");
                 _return();
                 printf("vyskok z returnu\n");
-                TOKEN_MOVE_NEXT(Token);
+                GET_NEXT(Token);
                 break;
 
         case BRACKET_CURLY_CLOSE: 
@@ -203,6 +217,10 @@ int statement(){
 
         default: errorExit(syntaxError,"in statement"); break;
     }
+    printf("no statement\n");
+   /* if(returnFlag && Token->type != KEYWORD_RETURN){
+        errorExit(syntaxError,"function with return type/s doesnt return anything");
+    }*/
     return syntaxOK;
    
 }
@@ -225,10 +243,10 @@ int definition(){
     printf("in definition\n");
     CHECK_TYPE(ID);
     printf("ID checked\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_TYPE(OPERATOR_DEFINE);
     printf("operator define checked\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_STATE(expression);
 
 }
@@ -238,18 +256,18 @@ int assignment(){
     printf("checking ids\n");
     CHECK_TYPE(OPERATOR_ASSIGN);
     Token_t *savedTokenAssign = Token; // tokentype "="
-    TOKEN_MOVE_NEXT(Token);  //expressions alebo call token
+    GET_NEXT(Token);  //expressions alebo call token
     Token_t *savedTokenID = Token;// tokentype ID
     TEST_TYPE(ID); //ak je za id ( ,tak je to call /// je to ID flag = 1, neni to ID flag = 0
     if(decisionFlag){
         printf("bolo tam ID\n");
-        TOKEN_MOVE_NEXT(Token);
+        GET_NEXT(Token);
         TEST_TYPE(BRACKET_ROUND_OPEN);
         if(decisionFlag){ // ak je to "(",tak vieme ze je to call
             printf("bude call\n");
             Token = savedTokenID;
             CHECK_STATE(_call); ///potrebujem pri volani ID v activeToken
-            TOKEN_MOVE_NEXT(Token);
+            GET_NEXT(Token);
         }else{ // ak to nie je "(", je to expression
             printf("bude vyraz 1\n");
             Token = savedTokenID;//or assign
@@ -267,29 +285,29 @@ int _if(){
 //<if> -> if <expression> <body> else <body>
     CHECK_TYPE(KEYWORD_IF);
     printf("keyword IF checked\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     expression();
     body();
     printf("von z body\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_TYPE(KEYWORD_ELSE);
     printf("else OK\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     body();
 
 }
 int _for(){
 //<for> -> for  <definition> | eps ; <expression> ; <assignment> | eps  <body>
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     TEST_TYPE(ID);
     if(decisionFlag){
         CHECK_TYPE(ID);
         CHECK_STATE(definition);
     }
     CHECK_TYPE(SEMICOLON); // eps
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_STATE(expression);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     if(Token->type == BRACKET_CURLY_OPEN){//eps
             body();
 
@@ -301,10 +319,10 @@ int _for(){
 }
 int _call(){
 
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
     printf("pohoda\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     if(Token->type == BRACKET_ROUND_CLOSE){
         return syntaxOK; // no params in call
     }
@@ -331,7 +349,7 @@ int _call_param(){
         default: errorExit(syntaxError,"parser: in call param ");break;
 
     }
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     _call_param_n();
 
 }
@@ -341,7 +359,7 @@ int _call_param_n(){
         return syntaxOK; //no more params
     }
     CHECK_TYPE(COMMA);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     _call_param();
 
 }
@@ -353,14 +371,14 @@ int _return(){
     DECIDE();//eps
     CHECK_TYPE(KEYWORD_RETURN);//return 
     printf("return keyword tested\n");
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_STATE(expressions);
     
 }
 int id(){
 
     CHECK_TYPE(ID);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     id_n();
 
 }
@@ -370,9 +388,9 @@ int id_n(){
     if(Token->type != COMMA){
         return syntaxOK;
     }
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     CHECK_TYPE(ID);
-    TOKEN_MOVE_NEXT(Token);
+    GET_NEXT(Token);
     id_n();
 
 }
@@ -391,7 +409,7 @@ int expression_n(){
     if(decisionFlag){
         CHECK_TYPE(COMMA);
         printf("COMMA OK\n");
-        TOKEN_MOVE_NEXT(Token);
+        GET_NEXT(Token);
         CHECK_STATE(expression);
         CHECK_STATE(expression_n);
     }
@@ -416,7 +434,7 @@ int expression(){
 		if(decisionFlag){printf("= in expression\n");break;}
 		TEST_TYPE(OPERATOR_DEFINE);
 		if(decisionFlag){printf(":= in expression\n");break;}
-		TOKEN_MOVE_NEXT(Token);
+		GET_NEXT(Token);
 		printf("active token: %s\n",Token->value);
 	}
 
