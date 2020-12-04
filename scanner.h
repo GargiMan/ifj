@@ -1,7 +1,7 @@
 /**
  * @file scanner.h
  * @author Marek Gergel (xgerge01)
- * @brief IFJ20 Compiler
+ * @brief IFJ20 - Header for operations with tokens
  */
 
 #ifndef SCANNER_H
