@@ -1,7 +1,7 @@
 /**
  * @file main.c
  * @author Marek Gergel (xgerge01)
- * @brief IFJ20 Compiler
+ * @brief IFJ20 Main function
  */
 
 //#define DEBUG 1     //uncomment for debug info

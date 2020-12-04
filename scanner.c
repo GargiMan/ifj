@@ -1,7 +1,7 @@
 /**
  * @file scanner.c
  * @author Marek Gergel (xgerge01)
- * @brief IFJ20 Compiler
+ * @brief IFJ20 - Read tokens from stdin to list
  */
 
 #include "scanner.h"
