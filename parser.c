@@ -5,367 +5,383 @@
  */
 
 #include "parser.h"
-Token_t *activeToken;
-int decisionFlag;
-#define NEXT_TOKEN(activeToken)(activeToken = activeToken->pNext)
-#define syntaxOK  0
-#define CHECK_TYPE(TOKENTYPE) \
-    if (activeToken->type != TOKENTYPE){ \
-        errorExit(syntaxError,"parser: .... "); \
-    }   \
-
-#define CHECK_EOF() \
-    if (activeToken == list.pTail) {return syntaxOK;}else{ errorExit(syntaxError, "No EOF");} ///// treba tokentype EOF
-
-#define TEST_TYPE(TOKENTYPE) \
-    if (activeToken->type == TOKENTYPE){ \
-        decisionFlag = 1; \
-    } else \
-    { \
-        decisionFlag = 0; \
-    } \
-
-#define DECIDE() \
-    if (decisionFlag){return syntaxOK;} \
-
-#define CHECK_STATE(state) \
-    if (state() == syntaxError){ \
-        errorExit(syntaxError, "....");} \
-
-    
-
-
 
 int parse(){
-
-    tHTable* globalSymTable;
-    htInit(globalSymTable);
-    activeToken = list.pHead;
-    CHECK_STATE(prog);
+    Token = list.pHead;
+    prog();
+    printf("ALL OK!\n");
     return syntaxOK;
 }
 
-//<prog> -> package id $ <exec>
 int prog(){
 
    CHECK_TYPE(KEYWORD_PACKAGE); 
-   NEXT_TOKEN(activeToken);
-   CHECK_TYPE(IDENTIFIER);
-    if(!strcmp("main",activeToken->value)){ // hodil by sa tokentype keyword main
-        NEXT_TOKEN(activeToken);
-        CHECK_TYPE(EOL); // $
-        CHECK_STATE(exec);
-        CHECK_EOF();
-        return syntaxOK; //syntax ok
+   TOKEN_MOVE_NEXT(Token);
+   CHECK_TYPE(ID);
+    if(!strcmp("main",Token->value)){
+
+        TOKEN_MOVE_NEXT(Token);
+        CHECK_TYPE(EOL);
+        exec();
+        return syntaxOK; 
     
     }
-    errorExit(syntaxError, "in prog");
+
+    errorExit(syntaxError, "Prolog form has to be : 'package main'\n");
 }
 
-
 int exec(){
-//<exec> -> <func> <func_n>
    
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(func);
-
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(func_n);
-
+    func();
+    func_n();
+    return syntaxOK;
     
 }
 int func(){
-//<func> -> func id (<params>)<func_types>{ $ <body>}
-    
-    CHECK_TYPE(KEYWORD_FUNC);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(IDENTIFIER);
-    //TODO ulozit ID do symtable
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(BRACKET_ROUND_OPEN);
-    NEXT_TOKEN(activeToken); // id alebo eps
-    CHECK_STATE(params);
-    
-    //NEXT_TOKEN();
-    CHECK_TYPE(BRACKET_ROUND_CLOSE);
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(func_types);
-    
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(BRACKET_CURLY_OPEN);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(EOL);
-    CHECK_STATE(body);
-    CHECK_TYPE(BRACKET_CURLY_CLOSE);
 
+    TOKEN_MOVE_NEXT(Token);
+    CHECK_TYPE(KEYWORD_FUNC);
+    TOKEN_MOVE_NEXT(Token);
+    CHECK_TYPE(ID);
+    TOKEN_MOVE_NEXT(Token);
+    CHECK_TYPE(BRACKET_ROUND_OPEN);
+    TOKEN_MOVE_NEXT(Token);
+    params(); 
+    TOKEN_MOVE_NEXT(Token);
+    func_types(); //ACT {
+    //TOKEN_MOVE_NEXT(Token);
+    body();
+    return syntaxOK;
 }
 int params(){
-    //<params> -> id <type> <params_n> | eps
     
-    TEST_TYPE(BRACKET_ROUND_CLOSE);
-    DECIDE();
-    CHECK_TYPE(IDENTIFIER);
-    //TODO ulozit ID do symtable
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(type);
-    NEXT_TOKEN(activeToken);
-    TEST_TYPE(BRACKET_ROUND_CLOSE);
-    DECIDE();
-    CHECK_STATE(params_n);
-
+    if(Token->type == BRACKET_ROUND_CLOSE){
+        return syntaxOK;  // no params
+    }
+    CHECK_TYPE(ID);
+    TOKEN_MOVE_NEXT(Token);
+    type();
+    TOKEN_MOVE_NEXT(Token);
+    params_n();
 }
 
 int type(){
-//<type> -> int | float64 | string
-   
-    TEST_TYPE(KEYWORD_INT);
-    DECIDE();
-    TEST_TYPE(KEYWORD_FLOAT64);
-    DECIDE();
-    TEST_TYPE(KEYWORD_STRING);
-    DECIDE();
-    errorExit(syntaxError, "in type");
+
+    switch(Token->type){
+        case KEYWORD_INT:
+            break;
+        case KEYWORD_FLOAT64:
+            break;
+        case KEYWORD_STRING:
+            break;
+        default:
+            return syntaxError;
+    }
 
 }
 int params_n(){
 
-    //<params_n> -> , id <type> <params_n> | eps
-    TEST_TYPE(BRACKET_ROUND_CLOSE);
-    DECIDE();
+    if(Token->type == BRACKET_ROUND_CLOSE){
+        return syntaxOK;  // no more params
+    }
     CHECK_TYPE(COMMA);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(IDENTIFIER);
-    //ID do symtable
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(type);
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(params_n);
+    TOKEN_MOVE_NEXT(Token);
+    CHECK_TYPE(ID);
+    TOKEN_MOVE_NEXT(Token);
+    type();
+    TOKEN_MOVE_NEXT(Token);
+    params_n();
 
 }
 int func_types(){
-   // <func_types> -> (int <types_n>) | (float64 <types_n>) | (string <types_n>) | eps
-   TEST_TYPE(BRACKET_CURLY_OPEN);
-   DECIDE();
+
+   if(Token->type == BRACKET_CURLY_OPEN){
+        return syntaxOK;  // no return types
+    }
    CHECK_TYPE(BRACKET_ROUND_OPEN);
-   NEXT_TOKEN(activeToken);
-   CHECK_STATE(type);
-   CHECK_STATE(types_n);
-   CHECK_TYPE(BRACKET_ROUND_CLOSE);
-
-
+   TOKEN_MOVE_NEXT(Token);
+   type();
+   TOKEN_MOVE_NEXT(Token);
+   types_n();
+   TOKEN_MOVE_NEXT(Token);
 }
 int types_n(){
-    //<types_n> -> , <type> <types_n> | eps
-    TEST_TYPE(BRACKET_ROUND_CLOSE);
-    DECIDE();
-    CHECK_TYPE(COMMA);
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(type);
-    CHECK_STATE(types_n);
 
+    if(Token->type == BRACKET_ROUND_CLOSE){
+        return syntaxOK;  // no return types
+    }
+    CHECK_TYPE(COMMA);
+    TOKEN_MOVE_NEXT(Token);
+    type();
+    TOKEN_MOVE_NEXT(Token);
+    types_n();
 }
 int func_n(){
 //<func_n> -> $ <func> <func_n> | eps //ak uz nie su dalsie funkcie tak je EOF
+    printf("func_n\n");
+    TEST_EOF();
+    TOKEN_MOVE_NEXT(Token);
+    TEST_EOF();
     TEST_TYPE(EOL);
     if (decisionFlag){
+        printf("more functions\n");
         CHECK_TYPE(EOL);
-        NEXT_TOKEN(activeToken);
-        CHECK_STATE(func);
-        CHECK_STATE(func_n);
+        func();
+        printf("FUNC OK\n");
+        func_n();
+        printf("FUNC_N OK\n");
     }
-    NEXT_TOKEN(activeToken);
-    CHECK_EOF()
+ 
+    return syntaxOK;
 }
 int body(){
-//act token EOL
-//<body> -> <statement> <statements>
-    CHECK_STATE(statement); //ak je body prazdne tak activeToken by mal byt } //ak vyjdeme z call tak activeToken je )
-    CHECK_STATE(statements);
+    printf("bodyyy\n");
+    CHECK_TYPE(BRACKET_CURLY_OPEN);
+    printf("curly open pohoda\n");
+    TOKEN_MOVE_NEXT(Token);
+    statement();
+    printf("skok zo statement\n");
+    if(Token->type == BRACKET_CURLY_CLOSE){
+        printf("jop je to ono\n");
+        return syntaxOK;
+    }
+    statement_n();
 }
 int statement(){
-//<statement> -> <definition> | <assignment> | <if> | <for> | <call> | <return>
 
-    NEXT_TOKEN(activeToken); // prvy token v body okrem EOLu
-    //TODO switch podla typu tokenu
-    Token_t *savedToken = activeToken; // ulozenie prveho tokenu
+    CHECK_TYPE(EOL);
+    printf("EOL\n");
+    TOKEN_MOVE_NEXT(Token);
+    Token_t *savedToken = Token; 
 
-    // <call> | <definition> | <assignment>
-    TEST_TYPE(IDENTIFIER);
-    if(decisionFlag){
-        CHECK_TYPE(IDENTIFIER);
-        NEXT_TOKEN(activeToken);
-        switch(activeToken->type){
+    if(Token->type == ID){
+        TOKEN_MOVE_NEXT(Token);
+        switch(Token->type){
+            case BRACKET_ROUND_OPEN: 
+                Token = savedToken;
+                _call();
+                TOKEN_MOVE_NEXT(Token);
+                break;
 
-            activeToken = savedToken;
+            case OPERATOR_DEFINE: 
+                Token = savedToken;
+                definition();
+                break;
 
-            case BRACKET_ROUND_OPEN: CHECK_STATE(_call);
+            case COMMA:
+            case OPERATOR_ASSIGN: 
+                Token = savedToken;
+                assignment();
+                break;
 
-            case OPERATOR_DEFINE: CHECK_STATE(definition);
-        
-            case OPERATOR_ASSIGN: CHECK_STATE(assignment);
-
-            default: return syntaxError;
+            default: errorExit(syntaxError,"in statement"); break;
         }
+        return syntaxOK;
     }
 
-    //<if> | <for> | <return>
-    TEST_TYPE(KEYWORD_IF);
-    if(decisionFlag){
-        CHECK_STATE(_if);
+    switch(Token->type){
+        case KEYWORD_IF: 
+                _if();
+                TOKEN_MOVE_NEXT(Token);
+                break;
+
+        case KEYWORD_FOR: 
+                _for();
+                TOKEN_MOVE_NEXT(Token);
+                break;
+        
+        case KEYWORD_RETURN: 
+                printf("skok do returnu\n");
+                _return();
+                printf("vyskok z returnu\n");
+                TOKEN_MOVE_NEXT(Token);
+                break;
+
+        case BRACKET_CURLY_CLOSE: 
+                printf("nasiel som to?\n");
+                break;
+
+        default: errorExit(syntaxError,"in statement"); break;
     }
-    TEST_TYPE(KEYWORD_FOR);
-    if(decisionFlag){
-        CHECK_STATE(_for);
-    }
-    CHECK_STATE(_return);
+    return syntaxOK;
+   
 }
 
-int statements(){
-//<statements> -> <statement> <statements> | eps
-    TEST_TYPE(BRACKET_CURLY_CLOSE);
-    DECIDE();// eps
+int statement_n(){
+
+    if(Token->type == BRACKET_CURLY_CLOSE){
+        printf("jop v statement_n je curly close\n");
+        return syntaxOK;
+    }
     
     CHECK_STATE(statement);
-    NEXT_TOKEN(activeToken); 
-    CHECK_STATE(statements);
+    
+    CHECK_STATE(statement_n);
 
 
 }
 int definition(){
 //<definition> -> id := <expression>
-    CHECK_TYPE(IDENTIFIER);
-    NEXT_TOKEN(activeToken);
+    printf("in definition\n");
+    CHECK_TYPE(ID);
+    printf("ID checked\n");
+    TOKEN_MOVE_NEXT(Token);
     CHECK_TYPE(OPERATOR_DEFINE);
-    NEXT_TOKEN(activeToken);
+    printf("operator define checked\n");
+    TOKEN_MOVE_NEXT(Token);
     CHECK_STATE(expression);
 
 }
 int assignment(){
 //<assignment> -> <ids> = <expressions> | <ids> = <call>
-    CHECK_STATE(ids);
-    NEXT_TOKEN(activeToken);
+    CHECK_STATE(id);
+    printf("checking ids\n");
     CHECK_TYPE(OPERATOR_ASSIGN);
-    Token_t *savedTokenAssign = activeToken; // tokentype "="
-    NEXT_TOKEN(activeToken);  //expressions alebo call token
-    Token_t *savedTokenID = activeToken;// tokentype ID
-    TEST_TYPE(IDENTIFIER); //ak je za id ( ,tak je to call /// je to ID flag = 1, neni to ID flag = 0
+    Token_t *savedTokenAssign = Token; // tokentype "="
+    TOKEN_MOVE_NEXT(Token);  //expressions alebo call token
+    Token_t *savedTokenID = Token;// tokentype ID
+    TEST_TYPE(ID); //ak je za id ( ,tak je to call /// je to ID flag = 1, neni to ID flag = 0
     if(decisionFlag){
-        NEXT_TOKEN(activeToken);
+        printf("bolo tam ID\n");
+        TOKEN_MOVE_NEXT(Token);
         TEST_TYPE(BRACKET_ROUND_OPEN);
         if(decisionFlag){ // ak je to "(",tak vieme ze je to call
-            activeToken = savedTokenID;
+            printf("bude call\n");
+            Token = savedTokenID;
             CHECK_STATE(_call); ///potrebujem pri volani ID v activeToken
+            TOKEN_MOVE_NEXT(Token);
         }else{ // ak to nie je "(", je to expression
-            activeToken = savedTokenAssign;
+            printf("bude vyraz 1\n");
+            Token = savedTokenID;//or assign
             CHECK_STATE(expressions);
         }
 
     }else{// ak to nie je id, je to urcite expression
-
-        activeToken = savedTokenAssign;
+        printf("bude vyraz 2\n");
+        Token = savedTokenID;//or assign
         CHECK_STATE(expressions);
     }
 
 }
 int _if(){
-//<if> -> if <expression> { $ <body> } else { $ <body>}
+//<if> -> if <expression> <body> else <body>
     CHECK_TYPE(KEYWORD_IF);
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(expression);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(BRACKET_CURLY_OPEN);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(EOL);
-    CHECK_STATE(body);
-    CHECK_TYPE(BRACKET_CURLY_CLOSE);
-    NEXT_TOKEN(activeToken);
+    printf("keyword IF checked\n");
+    TOKEN_MOVE_NEXT(Token);
+    expression();
+    body();
+    printf("von z body\n");
+    TOKEN_MOVE_NEXT(Token);
     CHECK_TYPE(KEYWORD_ELSE);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(BRACKET_CURLY_OPEN);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(EOL);
-    CHECK_STATE(body);
-    CHECK_TYPE(BRACKET_CURLY_CLOSE);
+    printf("else OK\n");
+    TOKEN_MOVE_NEXT(Token);
+    body();
 
 }
 int _for(){
-//<for> -> for  <definition> | <assignment> | eps ; <expression> ; <assignment>  { $ <body> }
-    CHECK_TYPE(KEYWORD_FOR);
-    NEXT_TOKEN(activeToken);
-    Token_t *savedToken = activeToken; // uloz ID / bodkociarku
-    TEST_TYPE(IDENTIFIER);
+//<for> -> for  <definition> | eps ; <expression> ; <assignment> | eps  <body>
+    TOKEN_MOVE_NEXT(Token);
+    TEST_TYPE(ID);
     if(decisionFlag){
-        CHECK_TYPE(IDENTIFIER);
-        NEXT_TOKEN(activeToken);
-        TEST_TYPE(OPERATOR_DEFINE);
-        if(decisionFlag){
-            CHECK_TYPE(OPERATOR_DEFINE);
-            activeToken = savedToken;
-            CHECK_STATE(definition); // definition chce prve ID
-
-        }else{
-            activeToken = savedToken;                   // ID,ID,ID = //// ID:=
-            CHECK_STATE(assignment);
-
-        }
+        CHECK_TYPE(ID);
+        CHECK_STATE(definition);
     }
     CHECK_TYPE(SEMICOLON); // eps
-    NEXT_TOKEN(activeToken);
+    TOKEN_MOVE_NEXT(Token);
     CHECK_STATE(expression);
-    //predat expression ; ako $
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(SEMICOLON);
-    NEXT_TOKEN(activeToken);
-    CHECK_STATE(assignment);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(BRACKET_CURLY_OPEN);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(EOL);
-    CHECK_STATE(body);
-    CHECK_TYPE(BRACKET_CURLY_CLOSE);
+    TOKEN_MOVE_NEXT(Token);
+    if(Token->type == BRACKET_CURLY_OPEN){//eps
+            body();
+
+    }else{
+            CHECK_STATE(assignment);
+            body();
+    }
 
 }
 int _call(){
-//<call> -> id(<params>)
-    //NEXT_TOKEN(activeToken);
-    CHECK_TYPE(IDENTIFIER);
-    NEXT_TOKEN(activeToken);
+
+    TOKEN_MOVE_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
-    CHECK_STATE(params);
-    CHECK_TYPE(BRACKET_ROUND_CLOSE);
+    printf("pohoda\n");
+    TOKEN_MOVE_NEXT(Token);
+    if(Token->type == BRACKET_ROUND_CLOSE){
+        return syntaxOK; // no params in call
+    }
+    _call_param();
+    //CHECK_TYPE(BRACKET_ROUND_CLOSE);
 
 }
+int _call_param(){
+
+    switch(Token->type){
+
+        case DATA_INT:
+            break;
+
+        case DATA_STRING:
+            break;
+
+        case DATA_FLOAT64:
+            break;
+
+        case ID:
+            break;
+
+        default: errorExit(syntaxError,"parser: in call param ");break;
+
+    }
+    TOKEN_MOVE_NEXT(Token);
+    _call_param_n();
+
+}
+int _call_param_n(){
+
+    if(Token->type == BRACKET_ROUND_CLOSE){
+        return syntaxOK; //no more params
+    }
+    CHECK_TYPE(COMMA);
+    TOKEN_MOVE_NEXT(Token);
+    _call_param();
+
+}
+
 int _return(){
 //<return> -> return <expressions> | eps
-    TEST_TYPE(BRACKET_CURLY_CLOSE);
+    //TEST_TYPE(BRACKET_CURLY_CLOSE);
+    TEST_TYPE(EOL);
     DECIDE();//eps
     CHECK_TYPE(KEYWORD_RETURN);//return 
-    NEXT_TOKEN(activeToken);
+    printf("return keyword tested\n");
+    TOKEN_MOVE_NEXT(Token);
     CHECK_STATE(expressions);
     
 }
-int ids(){
-//<ids> -> id <ids_n>
-    CHECK_TYPE(IDENTIFIER);
-    CHECK_STATE(ids_n);
+int id(){
+
+    CHECK_TYPE(ID);
+    TOKEN_MOVE_NEXT(Token);
+    id_n();
 
 }
-int ids_n(){
+int id_n(){
 //<ids_n> -> , id <ids_n> | eps
-    NEXT_TOKEN(activeToken);
-    TEST_TYPE(OPERATOR_ASSIGN);
-    DECIDE();
-    CHECK_TYPE(COMMA);
-    NEXT_TOKEN(activeToken);
-    CHECK_TYPE(IDENTIFIER);
-    CHECK_STATE(ids_n);
+
+    if(Token->type != COMMA){
+        return syntaxOK;
+    }
+    TOKEN_MOVE_NEXT(Token);
+    CHECK_TYPE(ID);
+    TOKEN_MOVE_NEXT(Token);
+    id_n();
 
 }
 
 int expressions(){
-//<expressions> -> <expression> <expression_n>
+//<expressions> -> <expression>  <expression_n>
 
-    CHECK_STATE(expression);
+    CHECK_STATE(expression); 
+    printf("expression checked\n");
     CHECK_STATE(expression_n);
 
 }
@@ -374,14 +390,35 @@ int expression_n(){
     TEST_TYPE(COMMA);
     if(decisionFlag){
         CHECK_TYPE(COMMA);
-        NEXT_TOKEN(activeToken);
+        printf("COMMA OK\n");
+        TOKEN_MOVE_NEXT(Token);
         CHECK_STATE(expression);
         CHECK_STATE(expression_n);
     }
+    //eps
+    printf("no more expressions\n");
     return syntaxOK;
     
 }
-//TODO parsovanie expressions
 int expression(){
+    printf("checking expression\n");
+	printf("active token: %s\n",Token->value);
+    while(Token != list.pTail){
+		TEST_TYPE(COMMA);
+		if(decisionFlag){printf("je to COMMA\n");break;}
+		TEST_TYPE(EOL);
+		if(decisionFlag){printf("je to EOL\n");break;}
+		TEST_TYPE(SEMICOLON);
+		if(decisionFlag){printf("je to SEMICOLON\n");break;}
+		TEST_TYPE(BRACKET_CURLY_OPEN);
+		if(decisionFlag){printf("je to CURLYOPEN\n");break;}
+		TEST_TYPE(OPERATOR_ASSIGN);
+		if(decisionFlag){printf("= in expression\n");break;}
+		TEST_TYPE(OPERATOR_DEFINE);
+		if(decisionFlag){printf(":= in expression\n");break;}
+		TOKEN_MOVE_NEXT(Token);
+		printf("active token: %s\n",Token->value);
+	}
+
     return syntaxOK;
 }
