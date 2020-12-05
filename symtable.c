@@ -1,7 +1,7 @@
 /**
  * @file symtable.c
  * @author Marek Gergel (xgerge01)
- * @brief IFJ20 Compiler
+ * @brief IFJ20 - Operations over symtable
  */
 
 #include "symtable.h"

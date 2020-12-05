@@ -14,8 +14,9 @@
 
 char* rtrType(TokenType_t type);
 
-//token list
+//global variables
 List_t list = {NULL, NULL};
+HTab_t* globaltab = NULL;
 
 int main() {
 
