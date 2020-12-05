@@ -1,12 +1,12 @@
 /**
  * @file symtable.c
  * @author Marek Gergel (xgerge01)
- * @brief IFJ20 Compiler
+ * @brief IFJ20 - Operations over symtable
  */
 
 #include "symtable.h"
 
-size_t htabHashFun(const char* str) {
+size_t htabHashFun(HTabKey_t str) {
 
     //hash variables
     uint32_t h = 0;     // must be 32bit int
@@ -18,10 +18,10 @@ size_t htabHashFun(const char* str) {
     return h;
 }
 
-htab_t* htabInit(size_t n) {
+HTab_t* htabInit(size_t n) {
 
     //table allocation = table struct + item struct pointer * array size
-    htab_t* tab = malloc(sizeof(htab_t) + sizeof(struct htab_item*) * n); 
+    HTab_t* tab = malloc(sizeof(HTab_t) + sizeof(HTabItem_t*) * n); 
     if (tab == NULL) errorExit(internalError, "symtable : Table allocation failed\n");
 
     //set table array size and number of items
@@ -34,7 +34,7 @@ htab_t* htabInit(size_t n) {
     return tab;
 }
 
-void htabClear(htab_t* t) {
+void htabClear(HTab_t* t) {
 
     //check table pointer
     if (t == NULL) return;
@@ -44,8 +44,9 @@ void htabClear(htab_t* t) {
 
         //erase item and move to next one
         while (t->array[i] != NULL) {
-            struct htab_item* item_next = t->array[i]->next;
+            HTabItem_t* item_next = t->array[i]->next;
             free(t->array[i]->key);
+            free(t->array[i]->data);
             free(t->array[i]);
             t->array[i] = item_next;
         }
@@ -57,7 +58,7 @@ void htabClear(htab_t* t) {
     return;
 }
 
-void htabFree(htab_t* t) {
+void htabFree(HTab_t* t) {
     
     //erase all items
     htabClear(t);
@@ -68,7 +69,7 @@ void htabFree(htab_t* t) {
     return;
 }
 
-size_t htabSize(const htab_t* t) {
+size_t htabSize(const HTab_t* t) {
 
     //check table pointer
     if (t == NULL) return 0;
@@ -77,7 +78,7 @@ size_t htabSize(const htab_t* t) {
     return t->size;
 }
 
-size_t htabBucketCount(const htab_t* t) {
+size_t htabBucketCount(const HTab_t* t) {
 
     //check table pointer
     if (t == NULL) return 0;
@@ -86,16 +87,16 @@ size_t htabBucketCount(const htab_t* t) {
     return t->arr_size;
 }
 
-htab_iterator_t htabFind(htab_t* t, htab_key_t key) {
+HTabIterator_t htabFind(HTab_t* t, HTabKey_t key) {
 
     //check table pointer
-    if (t == NULL || key == NULL) return htab_end(t);
+    if (t == NULL || key == NULL) return htabEnd(t);
 
     //index calculation for key
     size_t index = htabHashFun(key) % t->arr_size;
 
     //new iterator for return
-    htab_iterator_t it_found = {t->array[index], t, index};
+    HTabIterator_t it_found = {t->array[index], t, index};
 
     //search for key
     while(htabIteratorValid(it_found) && it_found.idx == index) {
@@ -106,7 +107,7 @@ htab_iterator_t htabFind(htab_t* t, htab_key_t key) {
     return it_found;
 }
 
-htab_iterator_t htabFindOrAdd(htab_t* t, htab_key_t key) {
+HTabIterator_t htabFindOrAdd(HTab_t* t, HTabKey_t key) {
 
     //check table pointer
     if (t == NULL || key == NULL) return htabEnd(t);
@@ -115,7 +116,7 @@ htab_iterator_t htabFindOrAdd(htab_t* t, htab_key_t key) {
     size_t index = htabHashFun(key) % t->arr_size;
 
     //new iterator for return
-    htab_iterator_t it_found = {t->array[index], t, index};
+    HTabIterator_t it_found = {t->array[index], t, index};
 
     //search for key
     while(htabIteratorValid(it_found) && it_found.idx == index) {
@@ -124,7 +125,7 @@ htab_iterator_t htabFindOrAdd(htab_t* t, htab_key_t key) {
     }
 
     //item allocation and check pointer
-    it_found.ptr = malloc(sizeof(struct htab_item));
+    it_found.ptr = malloc(sizeof(HTabItem_t));
     if (it_found.ptr == NULL) errorExit(internalError, "symtable : New item allocation failed");
 
     //key allocation and check pointer
@@ -146,7 +147,7 @@ htab_iterator_t htabFindOrAdd(htab_t* t, htab_key_t key) {
     return it_found;
 }
 
-void htabErase(htab_t* t, htab_iterator_t it) {
+void htabErase(HTab_t* t, HTabIterator_t it) {
 
     //check table and iterator pointer
     if (t == NULL || !htabIteratorValid(it)) return;
@@ -160,23 +161,24 @@ void htabErase(htab_t* t, htab_iterator_t it) {
     } else { 
         
         //find previous iterator
-        htab_iterator_t it_prev = {t->array[it.idx], t, it.idx};
+        HTabIterator_t it_prev = {t->array[it.idx], t, it.idx};
         while (it_prev.ptr->next != it.ptr) it_prev.ptr = it_prev.ptr->next;
         it_prev.ptr->next = it.ptr->next;
     }
 
-    //erase item and key
+    //erase item
     free(it.ptr->key);
+    free(it.ptr->data);
     free(it.ptr);
     t->size--;
 
     return;
 }
 
-htab_iterator_t htabBegin(const htab_t* t) {
+HTabIterator_t htabBegin(const HTab_t* t) {
 
     //new iterator for return
-    htab_iterator_t it_begin = {NULL, t, 0};
+    HTabIterator_t it_begin = {NULL, t, 0};
 
     //check table pointer
     if (t == NULL) return it_begin;
@@ -193,10 +195,10 @@ htab_iterator_t htabBegin(const htab_t* t) {
     return it_begin;
 }
 
-htab_iterator_t htabEnd(const htab_t* t) {
+HTabIterator_t htabEnd(const HTab_t* t) {
 
     //new iterator for return
-    htab_iterator_t it_end = {NULL, t, 0};
+    HTabIterator_t it_end = {NULL, t, 0};
 
     //check table pointer
     if (t == NULL) return it_end;
@@ -213,13 +215,13 @@ htab_iterator_t htabEnd(const htab_t* t) {
     return it_end;
 }
 
-htab_iterator_t htabIteratorNext(htab_iterator_t it) {
+HTabIterator_t htabIteratorNext(HTabIterator_t it) {
 
     //check iterator pointer
     if (!htabIteratorValid(it)) return it;
 
     //new iterator for return
-    htab_iterator_t it_next = {NULL, it.t, it.idx};
+    HTabIterator_t it_next = {NULL, it.t, it.idx};
 
     //not last item at index
     if (it.ptr->next != NULL) {
@@ -241,12 +243,12 @@ htab_iterator_t htabIteratorNext(htab_iterator_t it) {
 }
 
 // test: iterator != end()
-extern bool htabIteratorValid(htab_iterator_t it);
+extern bool htabIteratorValid(HTabIterator_t it);
 
 // test: iterator1 == iterator2
-extern bool htabIteratorEqual(htab_iterator_t it1, htab_iterator_t it2);
+extern bool htabIteratorEqual(HTabIterator_t it1, HTabIterator_t it2);
 
-htab_key_t htabIteratorGetKey(htab_iterator_t it) {
+HTabKey_t htabIteratorGetKey(HTabIterator_t it) {
 
     //check iterator pointer
     if (!htabIteratorValid(it)) return NULL;
@@ -255,20 +257,20 @@ htab_key_t htabIteratorGetKey(htab_iterator_t it) {
     return it.ptr->key;
 }
 
-htab_value_t htabIteratorGetValue(htab_iterator_t it) {
+HTabData_t* htabIteratorGetValue(HTabIterator_t it) {
 
     //check iterator pointer
-    if (!htabIteratorValid(it)) return 0;
+    if (!htabIteratorValid(it)) return NULL;
 
     //return value from iterator
     return it.ptr->data;
 }
 
-htab_value_t htabIteratorSetValue(htab_iterator_t it, htab_value_t val) {
+HTabData_t* htabIteratorSetValue(HTabIterator_t it, HTabData_t* data) {
 
     //check iterator pointer
-    if (!htabIteratorValid(it)) return 0;
+    if (!htabIteratorValid(it)) return NULL;
 
     //set iterator (item) value and return it
-    return it.ptr->data = val;
+    return it.ptr->data = data;
 }
