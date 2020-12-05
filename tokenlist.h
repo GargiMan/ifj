@@ -78,8 +78,8 @@ extern List_t list;
 #define TOKEN_SET_VALUE(token, value) (TOKEN_VALUE(token) = value)
 #define TOKEN_SET_NEXT(token, next) (TOKEN_NEXT(token) = next)
 
-#define TOKEN_CREATE(token) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
-#define TOKEN_CREATE_WT(token, type) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_TYPE(token, type); TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
+#define TOKEN_CREATE(token) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "tokenlist : Token allocation failed");}} while (0)
+#define TOKEN_CREATE_WT(token, type) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_TYPE(token, type); TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "tokenlist : Token allocation failed");}} while (0)
 #define TOKEN_MOVE_NEXT(token) (token = TOKEN_NEXT(token))
 #define TOKEN_IS_TYPE(token, type) (TOKEN_TYPE(token) == type)
 #define TOKEN_DESTROY(token) do { free(token->value); free(token); } while (0)

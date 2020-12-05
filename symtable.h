@@ -7,7 +7,9 @@
 #ifndef __SYMTABLE_H__
 #define __SYMTABLE_H__
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>     // uint32_t
 #include <string.h>     // size_t
 #include <stdbool.h>    // bool
 #include "error.h"
@@ -59,23 +61,23 @@ typedef struct HTabIterator {
 size_t htabHashFun(HTabKey_t str);                                          // hash function
 
 //table create / delete
-HTab_t *htabInit(size_t n);                                                 // konstruktor tabulky
-void htabClear(HTab_t * t);                                                 // rusi vsechny zaznamy
-void htabFree(HTab_t * t);                                                  // destruktor tabulky
+HTab_t* htabInit(size_t n);                                                 // konstruktor tabulky
+void htabClear(HTab_t* t);                                                 // rusi vsechny zaznamy
+void htabFree(HTab_t* t);                                                  // destruktor tabulky
 
 //table data
-size_t htabSize(const HTab_t * t);                                          // pocet zaznamu v tabulce
-size_t htabBucketCount(const HTab_t * t);                                   // velikost pole ptr (tabulky)
+size_t htabSize(const HTab_t* t);                                          // pocet zaznamu v tabulce
+size_t htabBucketCount(const HTab_t* t);                                   // velikost pole ptr (tabulky)
 
 // find / create or delete item
-HTabIterator_t htabFind(HTab_t * t, HTabKey_t key);                         // hledani klice v tabulce
-HTabIterator_t htabFindOrAdd(HTab_t * t, HTabKey_t key);                    // hledani klice v tabulce (ak nenajde, tak vytvori)
-void htabErase(HTab_t * t, HTabIterator_t it);                              // rusi zadany zaznam
+HTabIterator_t htabFind(HTab_t* t, HTabKey_t key);                         // hledani klice v tabulce
+HTabIterator_t htabFindOrAdd(HTab_t* t, HTabKey_t key);                    // hledani klice v tabulce (ak nenajde, tak vytvori)
+void htabErase(HTab_t* t, HTabIterator_t it);                              // rusi zadany zaznam
 
 // funkce pro praci s iteratorem:
 
-HTabIterator_t htabBegin(const HTab_t * t);                                 // iterator na prvni zaznam
-HTabIterator_t htabEnd(const HTab_t * t);                                   // iterator _za_ posledni zaznam
+HTabIterator_t htabBegin(const HTab_t* t);                                 // iterator na prvni zaznam
+HTabIterator_t htabEnd(const HTab_t* t);                                   // iterator _za_ posledni zaznam
 HTabIterator_t htabIteratorNext(HTabIterator_t it);                         // iterator++
 
 // test: iterator != end()
