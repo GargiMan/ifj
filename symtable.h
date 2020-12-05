@@ -9,30 +9,31 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>     // uint32_t
-#include <string.h>     // size_t
-#include <stdbool.h>    // bool
+#include <stdint.h>         // uint32_t
+#include <string.h>         // size_t
+#include <stdbool.h>        // bool
 #include "error.h"
+#include "string.h"
 
 typedef enum HTabDataType {
-	TYPE_UNDEFINED,	/// Data type undefined
-	TYPE_INT,		/// Integer data type
-	TYPE_DOUBLE,	/// Double data type
-	TYPE_STRING,	/// String data type
-	TYPE_BOOL,		/// Bool data type 
+	TYPE_UNDEFINED,	        // Data type undefined
+	TYPE_INT,		        // Integer data type
+	TYPE_DOUBLE,	        // Double data type
+	TYPE_STRING,	        // String data type
+	TYPE_BOOL,		        // Bool data type 
 } HTabDataType_t;
 
 typedef struct HTabData {
   HTabDataType_t type;      // data type
   bool def;                 // defined
-  String_t *params;         // parameters
+  String_t* params;         // parameters
   char* id;                 // identifier
   bool global;              // global
 } HTabData_t;
 
 // Item typedef
-typedef char* HTabKey_t;               // typ klice v zazname
-typedef struct htab_item HTabItem_t;   // typedef pre item
+typedef char* HTabKey_t;                // typ klice v zazname
+typedef struct HTabItem HTabItem_t;     // typedef pre item
 
 // Item
 struct HTabItem {
@@ -57,37 +58,36 @@ typedef struct HTabIterator {
 
 // funkce pro práci s tabulkou:
 
-//hash func
+// hash func
 size_t htabHashFun(HTabKey_t str);                                          // hash function
 
-//table create / delete
+// table create / delete
 HTab_t* htabInit(size_t n);                                                 // konstruktor tabulky
-void htabClear(HTab_t* t);                                                 // rusi vsechny zaznamy
-void htabFree(HTab_t* t);                                                  // destruktor tabulky
+void htabClear(HTab_t* t);                                                  // rusi vsechny zaznamy
+void htabFree(HTab_t* t);                                                   // destruktor tabulky
 
-//table data
-size_t htabSize(const HTab_t* t);                                          // pocet zaznamu v tabulce
-size_t htabBucketCount(const HTab_t* t);                                   // velikost pole ptr (tabulky)
+// table data
+size_t htabSize(const HTab_t* t);                                           // pocet zaznamu v tabulce
+size_t htabBucketCount(const HTab_t* t);                                    // velikost pole ptr (tabulky)
 
 // find / create or delete item
-HTabIterator_t htabFind(HTab_t* t, HTabKey_t key);                         // hledani klice v tabulce
-HTabIterator_t htabFindOrAdd(HTab_t* t, HTabKey_t key);                    // hledani klice v tabulce (ak nenajde, tak vytvori)
-void htabErase(HTab_t* t, HTabIterator_t it);                              // rusi zadany zaznam
+HTabIterator_t htabFind(HTab_t* t, HTabKey_t key);                          // hledani klice v tabulce
+HTabIterator_t htabFindOrAdd(HTab_t* t, HTabKey_t key);                     // hledani klice v tabulce (ak nenajde, tak vytvori)
+void htabErase(HTab_t* t, HTabIterator_t it);                               // rusi zadany zaznam
 
-// funkce pro praci s iteratorem:
-
-HTabIterator_t htabBegin(const HTab_t* t);                                 // iterator na prvni zaznam
-HTabIterator_t htabEnd(const HTab_t* t);                                   // iterator _za_ posledni zaznam
+// funkce pro praci s iteratorem
+HTabIterator_t htabBegin(const HTab_t* t);                                  // iterator na prvni zaznam
+HTabIterator_t htabEnd(const HTab_t* t);                                    // iterator _za_ posledni zaznam
 HTabIterator_t htabIteratorNext(HTabIterator_t it);                         // iterator++
 
-// test: iterator != end()
+// test: iterator != NULL / end()
 inline bool htabIteratorValid(HTabIterator_t it) { return it.ptr!=NULL; }
 // test: iterator1 == iterator2
 inline bool htabIteratorEqual(HTabIterator_t it1, HTabIterator_t it2) { return it1.ptr==it2.ptr && it1.t == it2.t; }
 
 // cteni a zapis pres iterator
 HTabKey_t htabIteratorGetKey(HTabIterator_t it);                            // vraci klic ze zaznamu iteratora
-HTabData_t htabIteratorGetValue(HTabIterator_t it);                         // vraci hodnotu ze zaznamu iteratora
-HTabData_t htabIteratorSetValue(HTabIterator_t it, HTabData_t data);        // zmeni a vraci hodnotu ze zaznamu iteratora
+HTabData_t* htabIteratorGetValue(HTabIterator_t it);                         // vraci hodnotu ze zaznamu iteratora
+HTabData_t* htabIteratorSetValue(HTabIterator_t it, HTabData_t* data);        // zmeni a vraci hodnotu ze zaznamu iteratora
 
 #endif // __SYMTABLE_H__
