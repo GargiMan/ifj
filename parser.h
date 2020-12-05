@@ -14,17 +14,16 @@
 #include "resources.h"
 #include "error.h"
 #include "symtable.h"
-#define syntaxOK  0
 #define CHECK_TYPE(TOKENTYPE) \
     if (Token->type != TOKENTYPE){ \
         errorExit(syntaxError,"parser: syntaxERR \n"); \
     }   \
 
 #define CHECK_EOF() \
-    if (Token == list.pTail) {return syntaxOK;}else{ errorExit(syntaxError, "No EOF\n");}
+    if (Token == list.pTail) {return 0;}else{ errorExit(syntaxError, "No EOF\n");}
 
 #define TEST_EOF() \
-    if (Token == list.pTail) {return syntaxOK;}
+    if (Token == list.pTail) {return 0;}
 
 #define TEST_TYPE(TOKENTYPE) \
     if (Token->type == TOKENTYPE){ \
@@ -36,7 +35,7 @@
 
 #define DECIDE() \
     if (decisionFlag){ \
-      return syntaxOK;} \
+      return 0;} \
 
 #define CHECK_STATE(state) \
     if (state() == syntaxError){ \
@@ -51,7 +50,7 @@ Token_t *Token;
 int decisionFlag;
 char* funcName;
 int returnFlag;
-
+/*
 int parse();//
 int prog();//
 int exec();//
@@ -77,6 +76,6 @@ int _call();//
 int _return();//
 int _call_param();
 int _call_param_();
-int expression();
+int expression();*/
 
 #endif

@@ -8,12 +8,10 @@
 
 int parse(){
     Token = list.pHead;
-    HTab_t globalTable;
-    HTab_t localTable;
     prog();
     printf("ALL OK!\n");
     //prog();
-    return syntaxOK;
+    return 0;
 }
 
 int prog(){
@@ -28,7 +26,7 @@ int prog(){
         GET_NEXT(Token);
         CHECK_TYPE(EOL);
         exec();
-        return syntaxOK; 
+        return 0; 
     
     }
 
@@ -39,7 +37,7 @@ int exec(){
    
     func();
     func_n();
-    return syntaxOK;
+    return 0;
     
 }
 int func(){
@@ -48,6 +46,7 @@ int func(){
     CHECK_TYPE(KEYWORD_FUNC);
     GET_NEXT(Token);
     CHECK_TYPE(ID);
+
     GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
     GET_NEXT(Token);
@@ -55,13 +54,13 @@ int func(){
     GET_NEXT(Token);
     func_types();
     body();
-    return syntaxOK;
+    return 0;
 }
 
 int params(){
     
     if(Token->type == BRACKET_ROUND_CLOSE){
-        return syntaxOK;  // no params
+        return 0;  // no params
     }
     CHECK_TYPE(ID);
     GET_NEXT(Token);
@@ -87,7 +86,7 @@ int type(){
 int params_n(){
 
     if(Token->type == BRACKET_ROUND_CLOSE){
-        return syntaxOK;  // no more params
+        return 0;  // no more params
     }
     CHECK_TYPE(COMMA);
     GET_NEXT(Token);
@@ -96,16 +95,16 @@ int params_n(){
     type();
     GET_NEXT(Token);
     params_n();
-
 }
 int func_types(){
+
     if(Token->type == BRACKET_CURLY_OPEN){
-        return syntaxOK;  // no return types && no brackets
+        return 0;  // no return types && no brackets
     }
 
     if(Token->type == BRACKET_ROUND_OPEN && Token->pNext->type == BRACKET_ROUND_CLOSE){
         GET_NEXT(Token);// no return types && brackets
-        return syntaxOK;
+        return 0;
     }
    CHECK_TYPE(BRACKET_ROUND_OPEN);
    GET_NEXT(Token);
@@ -114,11 +113,13 @@ int func_types(){
    GET_NEXT(Token);
    types_n();
    GET_NEXT(Token);
+
 }
+
 int types_n(){
 
     if(Token->type == BRACKET_ROUND_CLOSE){
-        return syntaxOK;  // no return types
+        return 0;  // no return types
     }
     CHECK_TYPE(COMMA);
     GET_NEXT(Token);
@@ -137,7 +138,7 @@ int func_n(){
         func();
         func_n();
     }
-    return syntaxOK;
+    return 0;
 }
 
 int body(){
@@ -146,10 +147,11 @@ int body(){
     GET_NEXT(Token);
     statement();
     if(Token->type == BRACKET_CURLY_CLOSE){
-        return syntaxOK;
+        return 0;
     }
     statement_n();
 }
+
 int statement(){
 
     CHECK_TYPE(EOL);
@@ -178,7 +180,7 @@ int statement(){
 
             default: errorExit(syntaxError,"in statement"); break;
         }
-        return syntaxOK;
+        return 0;
     }
 
     switch(Token->type){
@@ -206,14 +208,14 @@ int statement(){
    /* if(returnFlag && Token->type != KEYWORD_RETURN){
         errorExit(syntaxError,"function with return type/s doesnt return anything");
     }*/
-    return syntaxOK;
+    return 0;
    
 }
 
 int statement_n(){
 
     if(Token->type == BRACKET_CURLY_CLOSE){
-        return syntaxOK;
+        return 0;
     }
     
     CHECK_STATE(statement);
@@ -222,6 +224,7 @@ int statement_n(){
 
 
 }
+
 int definition(){
 
     CHECK_TYPE(ID);
@@ -233,6 +236,7 @@ int definition(){
     CHECK_STATE(expression);
 
 }
+
 int assignment(){
 
     CHECK_STATE(id);
@@ -264,11 +268,15 @@ int assignment(){
     }
 
 }
+
 int _if(){
 
     CHECK_TYPE(KEYWORD_IF);
     
     GET_NEXT(Token);
+    if(Token->type == BRACKET_CURLY_OPEN){
+        errorExit(syntaxError,"no expression in if\n");
+    }
     expression();
     body();
     
@@ -279,6 +287,7 @@ int _if(){
     body();
 
 }
+
 int _for(){
 
     GET_NEXT(Token);
@@ -303,6 +312,7 @@ int _for(){
     }
 
 }
+
 int _call(){
 
     GET_NEXT(Token);
@@ -310,11 +320,12 @@ int _call(){
     
     GET_NEXT(Token);
     if(Token->type == BRACKET_ROUND_CLOSE){
-        return syntaxOK; // no params in call
+        return 0; // no params in call
     }
     _call_param();
 
 }
+
 int _call_param(){
 
     switch(Token->type){
@@ -337,14 +348,16 @@ int _call_param(){
         default: errorExit(syntaxError,"parser: in call param \n");break;
 
     }
+
     GET_NEXT(Token);
     _call_param_n();
 
 }
+
 int _call_param_n(){
 
     if(Token->type == BRACKET_ROUND_CLOSE){
-        return syntaxOK; //no more params
+        return 0; //no more params
     }
     CHECK_TYPE(COMMA);
     GET_NEXT(Token);
@@ -362,6 +375,7 @@ int _return(){
     CHECK_STATE(expressions);
     
 }
+
 int id(){
 
     CHECK_TYPE(ID);
@@ -369,10 +383,11 @@ int id(){
     id_n();
 
 }
+
 int id_n(){
 
     if(Token->type != COMMA){
-        return syntaxOK;
+        return 0;
     }
     GET_NEXT(Token);
     CHECK_TYPE(ID);
@@ -387,6 +402,7 @@ int expressions(){
     CHECK_STATE(expression_n);
 
 }
+
 int expression_n(){
 
     TEST_TYPE(COMMA);
@@ -398,9 +414,10 @@ int expression_n(){
         CHECK_STATE(expression_n);
     }
     //eps
-    return syntaxOK;
+    return 0;
     
 }
+
 int expression(){
     while(Token != list.pTail){
 		TEST_TYPE(COMMA);
@@ -418,5 +435,5 @@ int expression(){
 		GET_NEXT(Token);
 		printf("active token: %s\n",Token->value);
 	}
-    return syntaxOK;
+    return 0;
 }
