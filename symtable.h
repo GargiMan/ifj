@@ -87,7 +87,7 @@ inline bool htabIteratorEqual(HTabIterator_t it1, HTabIterator_t it2) { return i
 
 // cteni a zapis pres iterator
 HTabKey_t htabIteratorGetKey(HTabIterator_t it);                            // vraci klic ze zaznamu iteratora
-HTabData_t* htabIteratorGetValue(HTabIterator_t it);                        // vraci hodnotu ze zaznamu iteratora
-HTabData_t* htabIteratorSetValue(HTabIterator_t it, HTabData_t* data);      // zmeni a vraci hodnotu ze zaznamu iteratora
+HTabData_t* htabIteratorGetData(HTabIterator_t it);                        // vraci hodnotu ze zaznamu iteratora
+HTabData_t* htabIteratorSetData(HTabIterator_t it, HTabData_t* data);      // zmeni a vraci hodnotu ze zaznamu iteratora
 
 #endif // __SYMTABLE_H__
