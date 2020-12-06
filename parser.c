@@ -8,6 +8,7 @@
 
 int parse(){
     Token = list.pHead;
+    globaltab = htabInit(19501);
     prog();
     printf("ALL OK!\n");
     //prog();
@@ -34,9 +35,13 @@ int prog(){
 }
 
 int exec(){
-   
+    
     func();
     func_n();
+    HTabIterator_t tmp = htabFind(globaltab,"main");
+    if(!tmp.ptr){
+        errorExit(semanticFunctionError,"main function missing\n");
+    }
     return 0;
     
 }
@@ -47,43 +52,56 @@ int func(){
     GET_NEXT(Token);
     CHECK_TYPE(ID);
 
+    HTabIterator_t tmp = htabFind(globaltab,Token->value);
+    if(tmp.ptr){
+        errorExit(semanticFunctionError,"parser: function redefinition\n");
+    }
+    HTabIterator_t iter = htabFindOrAdd(globaltab,Token->value);
+    HTab_t* localtab = htabInit(19501);
+
     GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
     GET_NEXT(Token);
-    params(); 
+    params(iter,localtab); 
     GET_NEXT(Token);
     func_types();
     body();
     return 0;
 }
 
-int params(){
+int params(HTabIterator_t iter,HTab_t* localtab){
     
     if(Token->type == BRACKET_ROUND_CLOSE){
+        //iter.ptr->data->params = "";
         return 0;  // no params
     }
     CHECK_TYPE(ID);
+    HTabIterator_t tmp = htabFindOrAdd(localtab,Token->value);
+
     GET_NEXT(Token);
-    type();
+    type(tmp,localtab);
     GET_NEXT(Token);
-    params_n();
+    params_n(localtab);
 }
 
 int type(){
 
     switch(Token->type){
         case KEYWORD_INT:
+                //iter.ptr->data->type = TYPE_INT;
             break;
         case KEYWORD_FLOAT64:
+                //iter.ptr->data->type = TYPE_DOUBLE;
             break;
         case KEYWORD_STRING:
+               // iter.ptr->data->type = TYPE_STRING;
             break;
         default:
             errorExit(syntaxError,"in type\n");
     }
 
 }
-int params_n(){
+int params_n(HTab_t* localtab){
 
     if(Token->type == BRACKET_ROUND_CLOSE){
         return 0;  // no more params
@@ -91,18 +109,27 @@ int params_n(){
     CHECK_TYPE(COMMA);
     GET_NEXT(Token);
     CHECK_TYPE(ID);
+    HTabIterator_t tmp = htabFind(localtab,Token->value);
+    if(tmp.ptr){
+        errorExit(semanticFunctionError,"parser: function parameters redefinition\n");
+    }
+    tmp = htabFindOrAdd(localtab,Token->value);
     GET_NEXT(Token);
     type();
     GET_NEXT(Token);
-    params_n();
+    params_n(localtab);
 }
 int func_types(){
 
     if(Token->type == BRACKET_CURLY_OPEN){
+
+        //iter.ptr->data->type = TYPE_UNDEFINED; //return type undefined
         return 0;  // no return types && no brackets
     }
 
     if(Token->type == BRACKET_ROUND_OPEN && Token->pNext->type == BRACKET_ROUND_CLOSE){
+
+       // iter.ptr->data->type = TYPE_UNDEFINED; //return type undefined
         GET_NEXT(Token);// no return types && brackets
         return 0;
     }
@@ -205,7 +232,7 @@ int statement(){
         default: errorExit(syntaxError,"in statement"); break;
     }
 
-   /* if(returnFlag && Token->type != KEYWORD_RETURN){
+    /* if(returnFlag && Token->type != KEYWORD_RETURN){
         errorExit(syntaxError,"function with return type/s doesnt return anything");
     }*/
     return 0;
@@ -341,7 +368,7 @@ int _call_param(){
 
         case ID:
                 if(!strcmp("_",Token->value)){
-                    errorExit(semanticFunctionError,"parser: _ in call param\n");
+                    errorExit(semanticOtherError,"parser: _ in call param\n");
                 }
             break;
 
