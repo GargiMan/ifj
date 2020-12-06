@@ -65,7 +65,7 @@ int func(){
     params(iter,localtab); 
     GET_NEXT(Token);
     func_types();
-    body();
+    body(localtab);
     return 0;
 }
 
@@ -168,18 +168,18 @@ int func_n(){
     return 0;
 }
 
-int body(){
+int body(HTab_t* localtab){
    
     CHECK_TYPE(BRACKET_CURLY_OPEN);
     GET_NEXT(Token);
-    statement();
+    statement(localtab);
     if(Token->type == BRACKET_CURLY_CLOSE){
         return 0;
     }
-    statement_n();
+    statement_n(localtab);
 }
 
-int statement(){
+int statement(HTab_t* localtab){
 
     CHECK_TYPE(EOL);
     GET_NEXT(Token);
@@ -190,19 +190,19 @@ int statement(){
         switch(Token->type){
             case BRACKET_ROUND_OPEN: 
                 Token = savedToken;
-                _call();
+                _call(localtab);
                 GET_NEXT(Token);
                 break;
 
             case OPERATOR_DEFINE: 
                 Token = savedToken;
-                definition();
+                definition(localtab);
                 break;
 
             case COMMA:
             case OPERATOR_ASSIGN: 
                 Token = savedToken;
-                assignment();
+                assignment(localtab);
                 break;
 
             default: errorExit(syntaxError,"in statement"); break;
@@ -212,17 +212,17 @@ int statement(){
 
     switch(Token->type){
         case KEYWORD_IF: 
-                _if();
+                _if(localtab);
                 GET_NEXT(Token);
                 break;
 
         case KEYWORD_FOR: 
-                _for();
+                _for(localtab);
                 GET_NEXT(Token);
                 break;
         
         case KEYWORD_RETURN: 
-                _return();
+                _return(localtab);
                 GET_NEXT(Token);
                 break;
 
@@ -239,20 +239,20 @@ int statement(){
    
 }
 
-int statement_n(){
+int statement_n(HTab_t* localtab){
 
     if(Token->type == BRACKET_CURLY_CLOSE){
         return 0;
     }
     
-    CHECK_STATE(statement);
+    statement(localtab);
     
-    CHECK_STATE(statement_n);
+    statement_n(localtab);
 
 
 }
 
-int definition(){
+int definition(HTab_t* localtab){
 
     CHECK_TYPE(ID);
     
@@ -260,13 +260,13 @@ int definition(){
     CHECK_TYPE(OPERATOR_DEFINE);
 
     GET_NEXT(Token);
-    CHECK_STATE(expression);
+    expression(localtab);
 
 }
 
-int assignment(){
+int assignment(HTab_t* localtab){
 
-    CHECK_STATE(id);
+    id(localtab);
     
     CHECK_TYPE(OPERATOR_ASSIGN);
     Token_t *savedTokenAssign = Token; 
@@ -280,23 +280,23 @@ int assignment(){
         if(decisionFlag){ 
             
             Token = savedTokenID;
-            CHECK_STATE(_call); 
+            _call(localtab);
             GET_NEXT(Token);
         }else{ 
             
             Token = savedTokenID;
-            CHECK_STATE(expressions);
+            expressions(localtab);
         }
 
     }else{
         
         Token = savedTokenID;
-        CHECK_STATE(expressions);
+        expressions(localtab);
     }
 
 }
 
-int _if(){
+int _if(HTab_t* localtab){
 
     CHECK_TYPE(KEYWORD_IF);
     
@@ -304,43 +304,43 @@ int _if(){
     if(Token->type == BRACKET_CURLY_OPEN){
         errorExit(syntaxError,"no expression in if\n");
     }
-    expression();
-    body();
+    expression(localtab);
+    body(localtab);
     
     GET_NEXT(Token);
     CHECK_TYPE(KEYWORD_ELSE);
     
     GET_NEXT(Token);
-    body();
+    body(localtab);
 
 }
 
-int _for(){
+int _for(HTab_t* localtab){
 
     GET_NEXT(Token);
     TEST_TYPE(ID);
     if(decisionFlag){
         CHECK_TYPE(ID);
-        CHECK_STATE(definition);
+        definition(localtab);
     }
     CHECK_TYPE(SEMICOLON); // eps
     GET_NEXT(Token);
     if(Token->type == SEMICOLON){
         errorExit(syntaxError,"expected expression in for statement\n");
     }
-    CHECK_STATE(expression);
+    expression(localtab);
     GET_NEXT(Token);
     if(Token->type == BRACKET_CURLY_OPEN){//eps
-            body();
+            body(localtab);
     }
     else{
-            CHECK_STATE(assignment);
-            body();
+            assignment(localtab);
+            body(localtab);
     }
 
 }
 
-int _call(){
+int _call(HTab_t* localtab){
 
     GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
@@ -349,11 +349,11 @@ int _call(){
     if(Token->type == BRACKET_ROUND_CLOSE){
         return 0; // no params in call
     }
-    _call_param();
+    _call_param(localtab);
 
 }
 
-int _call_param(){
+int _call_param(HTab_t* localtab){
 
     switch(Token->type){
 
@@ -377,41 +377,41 @@ int _call_param(){
     }
 
     GET_NEXT(Token);
-    _call_param_n();
+    _call_param_n(localtab);
 
 }
 
-int _call_param_n(){
+int _call_param_n(HTab_t* localtab){
 
     if(Token->type == BRACKET_ROUND_CLOSE){
         return 0; //no more params
     }
     CHECK_TYPE(COMMA);
     GET_NEXT(Token);
-    _call_param();
+    _call_param(localtab);
 
 }
 
-int _return(){
+int _return(HTab_t* localtab){
 
     
     TEST_TYPE(EOL);
     DECIDE();//eps
     CHECK_TYPE(KEYWORD_RETURN);
     GET_NEXT(Token);
-    CHECK_STATE(expressions);
+    expressions(localtab);
     
 }
 
-int id(){
+int id(HTab_t* localtab){
 
     CHECK_TYPE(ID);
     GET_NEXT(Token);
-    id_n();
+    id_n(localtab);
 
 }
 
-int id_n(){
+int id_n(HTab_t* localtab){
 
     if(Token->type != COMMA){
         return 0;
@@ -419,33 +419,33 @@ int id_n(){
     GET_NEXT(Token);
     CHECK_TYPE(ID);
     GET_NEXT(Token);
-    id_n();
+    id_n(localtab);
 
 }
 
-int expressions(){
+int expressions(HTab_t* localtab){
 
-    CHECK_STATE(expression); 
-    CHECK_STATE(expression_n);
+    expression(localtab);
+    expression_n(localtab);
 
 }
 
-int expression_n(){
+int expression_n(HTab_t* localtab){
 
     TEST_TYPE(COMMA);
     if(decisionFlag){
         CHECK_TYPE(COMMA);
        
         GET_NEXT(Token);
-        CHECK_STATE(expression);
-        CHECK_STATE(expression_n);
+        expression(localtab);
+        expression_n(localtab);
     }
     //eps
     return 0;
     
 }
 
-int expression(){
+int expression(HTab_t* localtab){
     while(Token != list.pTail){
 		TEST_TYPE(COMMA);
 		if(decisionFlag){printf("je to COMMA\n");break;}
