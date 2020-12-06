@@ -130,9 +130,17 @@ HTabIterator_t htabFindOrAdd(HTab_t* t, HTabKey_t key) {
 
     //key allocation and check pointer
     it_found.ptr->key = malloc(strlen(key) + 1);
-    if (htabIteratorGetKey(it_found) == NULL) {
+    if (it_found.ptr->key == NULL) {
         free(it_found.ptr);
         errorExit(internalError, "symtable : New item key allocation failed");
+    }
+
+    //data allocation and check pointer
+    it_found.ptr->data = malloc(sizeof(HTabData_t));
+    if (it_found.ptr->data == NULL) {
+        free(it_found.ptr->key);
+        free(it_found.ptr);
+        errorExit(internalError, "symtable : New item data allocation failed");
     }
 
     //set key and value for item
@@ -257,7 +265,7 @@ HTabKey_t htabIteratorGetKey(HTabIterator_t it) {
     return it.ptr->key;
 }
 
-HTabData_t* htabIteratorGetValue(HTabIterator_t it) {
+HTabData_t* htabIteratorGetData(HTabIterator_t it) {
 
     //check iterator pointer
     if (!htabIteratorValid(it)) return NULL;
@@ -266,7 +274,7 @@ HTabData_t* htabIteratorGetValue(HTabIterator_t it) {
     return it.ptr->data;
 }
 
-HTabData_t* htabIteratorSetValue(HTabIterator_t it, HTabData_t* data) {
+HTabData_t* htabIteratorSetData(HTabIterator_t it, HTabData_t* data) {
 
     //check iterator pointer
     if (!htabIteratorValid(it)) return NULL;
