@@ -145,7 +145,7 @@ HTabIterator_t htabFindOrAdd(HTab_t* t, HTabKey_t key) {
 
     //set key and value for item
     strcpy(it_found.ptr->key,key);
-    htabIteratorSetValue(it_found, 0);
+    htabIteratorSetData(it_found, 0);
     
     //add new item in table
     it_found.ptr->next = t->array[index];
