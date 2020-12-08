@@ -12,7 +12,6 @@ int parse(){
     prog();
     Token = list.pHead;
     prog();
-    printf("ALL OK!\n");
     return 0;
 }
 
@@ -510,22 +509,25 @@ int expression_n(HTab_t* localtab){
 }
 
 int expression(HTab_t* localtab){
+    if(Token->type == EOL){
+        errorExit(syntaxError,"no expression\n");
+    }
     while(Token != list.pTail){
 		TEST_TYPE(COMMA);
-		if(decisionFlag){printf("je to COMMA\n");break;}
+		if(decisionFlag){break;}
 		TEST_TYPE(EOL);
-		if(decisionFlag){printf("je to EOL\n");break;}
+		if(decisionFlag){break;}
 		TEST_TYPE(SEMICOLON);
-		if(decisionFlag){printf("je to SEMICOLON\n");break;}
+		if(decisionFlag){break;}
 		TEST_TYPE(BRACKET_CURLY_OPEN);
-		if(decisionFlag){printf("je to CURLYOPEN\n");break;}
+		if(decisionFlag){break;}
 		TEST_TYPE(OPERATOR_ASSIGN);
 		if(decisionFlag){errorExit(syntaxError,"= in expression\n");break;}
 		TEST_TYPE(OPERATOR_DEFINE);
 		if(decisionFlag){errorExit(syntaxError,":= in expression\n");break;}
         if(Token->type == ID && !strcmp("_",Token->value)){errorExit(semanticOtherError,"_ in expression\n");break;}
 		GET_NEXT(Token);
-		printf("active token: %s\n",Token->value);
+
 	}
     return 0;
 }

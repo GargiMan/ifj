@@ -27,8 +27,7 @@ typedef struct HTabData {
   HTabDataType_t type;      // data type
   bool def;                 // defined
   char* params;             // parameters
-  char* id;                 // identifier
-  bool global;              // global
+  char* funcTypes;              // global
 } HTabData_t;
 
 // Item typedef
