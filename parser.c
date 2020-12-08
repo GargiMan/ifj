@@ -7,14 +7,32 @@
 #include "parser.h"
 
 int parse(){
+
+    dataInit();
+    prog();
     Token = list.pHead;
-    globaltab = htabInit(19501);
     prog();
     printf("ALL OK!\n");
-    //prog();
     return 0;
 }
 
+int dataInit(){
+    frame = 0;
+    functionParse = 1;
+    Token = list.pHead;
+    globaltab = htabInit(19501);
+    htabFindOrAdd(globaltab,"inputs");
+    htabFindOrAdd(globaltab,"inputi");
+    htabFindOrAdd(globaltab,"inputf");
+    htabFindOrAdd(globaltab,"print");
+    htabFindOrAdd(globaltab,"int2float");
+    htabFindOrAdd(globaltab,"float2int");
+    htabFindOrAdd(globaltab,"len");
+    htabFindOrAdd(globaltab,"substr");
+    htabFindOrAdd(globaltab,"ord");
+    htabFindOrAdd(globaltab,"chr");
+
+}
 int prog(){
 
    if(Token->type == EOL){
@@ -35,41 +53,56 @@ int prog(){
 }
 
 int exec(){
-    
+
+    GET_NEXT(Token);//
     func();
-    func_n();
-    HTabIterator_t tmp = htabFind(globaltab,"main");
-    if(!tmp.ptr){
-        errorExit(semanticFunctionError,"main function missing\n");
+    if(!functionParse){
+        func_n();
+        HTabIterator_t tmp = htabFind(globaltab,"main");
+        if(!tmp.ptr){
+            errorExit(semanticIdentifierError,"main function missing\n");
+        }
     }
     return 0;
     
 }
 int func(){
 
-    GET_NEXT(Token);
+    //GET_NEXT(Token);
     CHECK_TYPE(KEYWORD_FUNC);
     GET_NEXT(Token);
     CHECK_TYPE(ID);
-
-    HTabIterator_t tmp = htabFind(globaltab,Token->value);
-    if(tmp.ptr){
-        errorExit(semanticFunctionError,"parser: function redefinition\n");
-    }
-    HTabIterator_t iter = htabFindOrAdd(globaltab,Token->value);
     HTab_t* localtab = htabInit(19501);
-
+    if(functionParse){ // iba pri prvom prechode kvoli definiciam funkcii
+        HTabIterator_t tmp = htabFind(globaltab,Token->value);
+        if(tmp.ptr){
+            errorExit(semanticFunctionError,"parser: function redefinition\n");
+        }
+        HTabIterator_t iter = htabFindOrAdd(globaltab,Token->value);
+    }
     GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
     GET_NEXT(Token);
-    params(iter,localtab); 
+    params(localtab); 
     GET_NEXT(Token);
     func_types();
+                if(functionParse){ ///prvy prechod kvoli definiciam funkcii
+                        while(Token->type != KEYWORD_FUNC){
+                            if(Token == list.pTail){
+                                functionParse--;
+                                return 0;
+                                break;
+                            }
+                            GET_NEXT(Token);
+                        }
+                    func();
+                    return 0;
+                }  
     body(localtab);
     return 0;
 }
 
-int params(HTabIterator_t iter,HTab_t* localtab){
+int params(HTab_t* localtab){
     
     if(Token->type == BRACKET_ROUND_CLOSE){
         //iter.ptr->data->params = "";
@@ -162,6 +195,7 @@ int func_n(){
     TEST_TYPE(EOL);
     if (decisionFlag){
         CHECK_TYPE(EOL);
+        GET_NEXT(Token);//
         func();
         func_n();
     }
@@ -255,12 +289,18 @@ int statement_n(HTab_t* localtab){
 int definition(HTab_t* localtab){
 
     CHECK_TYPE(ID);
-    
+    Token_t *tokenID = Token;
     GET_NEXT(Token);
     CHECK_TYPE(OPERATOR_DEFINE);
+    HTabIterator_t tmp = htabFind(localtab,tokenID->value);
+    if(tmp.ptr /*&& tmp.ptr->data->defined*/){
+        errorExit(semanticIdentifierError,"variable redefinition\n");
+    }
+    tmp = htabFindOrAdd(localtab,tokenID->value);
+    //tmp.ptr->data->defined = 1;
 
     GET_NEXT(Token);
-    expression(localtab);
+    expression(localtab);//hodit tam aj iterator kvoli datatype
 
 }
 
@@ -305,13 +345,21 @@ int _if(HTab_t* localtab){
         errorExit(syntaxError,"no expression in if\n");
     }
     expression(localtab);
-    body(localtab);
+    HTab_t* nextlocaltab = htabInit(19501);
+   // nextlocaltab = localtab;
+    
+    body(nextlocaltab);
+    
     
     GET_NEXT(Token);
     CHECK_TYPE(KEYWORD_ELSE);
     
     GET_NEXT(Token);
-    body(localtab);
+    htabClear(nextlocaltab);
+    //nextlocaltab = localtab;
+    
+    body(nextlocaltab);
+    
 
 }
 
@@ -342,6 +390,11 @@ int _for(HTab_t* localtab){
 
 int _call(HTab_t* localtab){
 
+    CHECK_TYPE(ID);
+    HTabIterator_t tmp = htabFind(globaltab,Token->value);
+    if(!tmp.ptr){
+        errorExit(semanticFunctionError,"calling function that is not defined\n");
+    }
     GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
     
@@ -355,8 +408,8 @@ int _call(HTab_t* localtab){
 
 int _call_param(HTab_t* localtab){
 
+    HTabIterator_t tmp = htabFind(localtab,Token->value);
     switch(Token->type){
-
         case DATA_INT:
             break;
 
@@ -369,6 +422,9 @@ int _call_param(HTab_t* localtab){
         case ID:
                 if(!strcmp("_",Token->value)){
                     errorExit(semanticOtherError,"parser: _ in call param\n");
+                }
+                if(!tmp.ptr){
+                        errorExit(semanticIdentifierError,"variable in function call is not defined\n");
                 }
             break;
 
@@ -406,6 +462,10 @@ int _return(HTab_t* localtab){
 int id(HTab_t* localtab){
 
     CHECK_TYPE(ID);
+            HTabIterator_t tmp = htabFind(localtab,Token->value);
+            if(!tmp.ptr && strcmp(Token->value,"_")){
+                errorExit(semanticIdentifierError,"variable not defined\n");
+            }
     GET_NEXT(Token);
     id_n(localtab);
 
@@ -418,6 +478,10 @@ int id_n(HTab_t* localtab){
     }
     GET_NEXT(Token);
     CHECK_TYPE(ID);
+            HTabIterator_t tmp = htabFind(localtab,Token->value);
+            if(!tmp.ptr){
+                errorExit(semanticIdentifierError,"variable not defined\n");
+            }
     GET_NEXT(Token);
     id_n(localtab);
 
@@ -456,9 +520,10 @@ int expression(HTab_t* localtab){
 		TEST_TYPE(BRACKET_CURLY_OPEN);
 		if(decisionFlag){printf("je to CURLYOPEN\n");break;}
 		TEST_TYPE(OPERATOR_ASSIGN);
-		if(decisionFlag){printf("= in expression\n");break;}
+		if(decisionFlag){errorExit(syntaxError,"= in expression\n");break;}
 		TEST_TYPE(OPERATOR_DEFINE);
-		if(decisionFlag){printf(":= in expression\n");break;}
+		if(decisionFlag){errorExit(syntaxError,":= in expression\n");break;}
+        if(Token->type == ID && !strcmp("_",Token->value)){errorExit(semanticOtherError,"_ in expression\n");break;}
 		GET_NEXT(Token);
 		printf("active token: %s\n",Token->value);
 	}
