@@ -86,13 +86,13 @@ extern List_t list;
 
 //list operations
 
-#define LIST_HEAD (list.pHead)
-#define LIST_TAIL (list.pTail)
+#define LIST_HEAD(list) (list.pHead)
+#define LIST_TAIL(list) (list.pTail)
 
-#define LIST_IS_EMPTY (!LIST_HEAD)
+#define LIST_IS_EMPTY(list) (!LIST_HEAD(list))
 
-#define LIST_ADD_TOKEN(token) do { if (LIST_IS_EMPTY) {LIST_HEAD = token; LIST_TAIL = token;} else {TOKEN_SET_NEXT(LIST_TAIL, token); LIST_TAIL = token;}} while (0)
-#define LIST_ADD_TOKEN_WT(token, type) do { TOKEN_CREATE_WT(token, type); if (LIST_IS_EMPTY) {LIST_HEAD = token; LIST_TAIL = token;} else {TOKEN_SET_NEXT(LIST_TAIL, token); LIST_TAIL = token;}} while (0)
-#define LIST_CLEAR while (!LIST_IS_EMPTY) {LIST_TAIL = TOKEN_NEXT(LIST_HEAD); TOKEN_DESTROY(LIST_HEAD); LIST_HEAD = LIST_TAIL;}
+#define LIST_ADD_TOKEN(list, token) do { if (LIST_IS_EMPTY(list)) {LIST_HEAD(list) = token; LIST_TAIL(list) = token;} else {TOKEN_SET_NEXT(LIST_TAIL(list), token); LIST_TAIL(list) = token;}} while (0)
+#define LIST_ADD_TOKEN_WT(list, token, type) do { TOKEN_CREATE_WT(token, type); if (LIST_IS_EMPTY(list)) {LIST_HEAD(list) = token; LIST_TAIL(list) = token;} else {TOKEN_SET_NEXT(LIST_TAIL(list), token); LIST_TAIL(list) = token;}} while (0)
+#define LIST_CLEAR(list) while (!LIST_IS_EMPTY(list)) {LIST_TAIL(list) = TOKEN_NEXT(LIST_HEAD(list)); TOKEN_DESTROY(LIST_HEAD(list)); LIST_HEAD(list) = LIST_TAIL(list);}
 
 #endif // TOKENLIST_H
