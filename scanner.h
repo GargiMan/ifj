@@ -14,7 +14,7 @@
 
 //assign inside NOT allowed
 #define IS_EOL(c) (c == '\n' || c == '\r')
-#define IS_NOT_TERM(c) (c == ' ' || c == '\t' || c == '\0')
+#define IS_NOT_TOKEN(c) (c == ' ' || c == '\t' || c == '\0')
 #define IS_NUMBER(c) (c > 47 && c < 58) // 0-9
 #define IS_NUMBER_HEX(c) ((c > 47 && c < 58) || (c > 64 && c < 71) || (c > 96 && c < 103))
 #define IS_APLHA(c) ((c > 64 && c < 91) || (c > 96 && c < 123)) // a-z || A-Z
