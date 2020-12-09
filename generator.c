@@ -122,12 +122,26 @@ void generate_file_header() {
 }
 void generate_CHR(){
 	printf(CHR);
-
+	return;
+}
 void generate_LEN(){
 	printf(LEN);
+	return;
 }
-
-void generate(Instruction_t ins1) {
+void generate_main_start(){
+	printf("LABEL $$main\n");
+	printf("CREATEFRAME\nPUSHFRAME\n");
+	return;
+}
+void generate_main_end(){
+	printf("POPFRAME\nCLEARS\n");
+	return;
+}
+void generate_print(){
+	printf("WRITE GF@%exp_result\n");
+	return;
+}
+void generate(Instruction_t ins1){
 
 		switch(token->type){
 			case ADD:
@@ -141,6 +155,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 		
 			case SUB:
@@ -154,6 +169,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 		
 			case MUL:
@@ -167,6 +183,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 
 			case DIV:
@@ -180,6 +197,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 			
 			case AND:
@@ -193,6 +211,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 		
 			case OR:
@@ -206,6 +225,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 			
 			case NOT:
@@ -219,6 +239,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 				
 			case LT:
@@ -232,6 +253,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 			
 			case GT:
@@ -245,6 +267,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 		
 			case EQ:
@@ -258,6 +281,7 @@ void generate(Instruction_t ins1) {
 				printf(" ");
 				printf("");
 				printf("\n");
+				printf("POPFRAME\n");
 				break;
 		
 		
@@ -272,7 +296,5 @@ void generate(Instruction_t ins1) {
 		
 		
 		}
-	}
-
 	return;
 }
