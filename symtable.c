@@ -178,8 +178,8 @@ void htabErase(HTab_t* t, HTabIterator_t it) {
 
     //erase item
     free(it.ptr->key);
-    free(t->array[i]->data->params);
-    free(t->array[i]->data->functypes);
+    free(it.ptr->data->params);
+    free(it.ptr->data->functypes);
     free(it.ptr->data);
     free(it.ptr);
     t->size--;
