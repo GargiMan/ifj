@@ -62,6 +62,9 @@ void htabClear(HTab_t* t) {
 
 void htabFree(HTab_t* t) {
     
+    //check table pointer
+    if (t == NULL) return;
+
     //erase all items
     htabClear(t);
 
@@ -147,7 +150,6 @@ HTabIterator_t htabFindOrAdd(HTab_t* t, HTabKey_t key) {
 
     //set key and value for item
     strcpy(it_found.ptr->key,key);
-    htabIteratorSetData(it_found, 0);
     
     //add new item in table
     it_found.ptr->next = t->array[index];
