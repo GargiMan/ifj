@@ -11,7 +11,7 @@
 #include "scanner.h"
 #include "error.h"
 #include "resources.h"
-
+#include "parser.h"
 char* rtrType(TokenType_t type);
 
 //global variables
@@ -25,7 +25,7 @@ int main() {
 
     //parser
 
-
+    parse();
 
 
     //debug

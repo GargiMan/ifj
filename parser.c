@@ -5,7 +5,7 @@
  */
 
 #include "parser.h"
-HTab_t* localtab;
+
 void parse(){
 
     dataInit();
@@ -13,24 +13,24 @@ void parse(){
     Token = list.pHead;
     prog();
     htabClear(globaltab);
+    htabFree(localtab);
     return;
 }
 
 void dataInit(){
     functionParse = 1;
     Token = list.pHead;
-    globaltab = htabInit(19501);
-    HTabIterator_t iter;
-    iter = htabFindOrAdd(globaltab,"inputs");
-    iter = htabFindOrAdd(globaltab,"inputi");
-    iter = htabFindOrAdd(globaltab,"inputf");
-    iter = htabFindOrAdd(globaltab,"print");
-    iter = htabFindOrAdd(globaltab,"int2float");
-    iter = htabFindOrAdd(globaltab,"float2int");
-    iter = htabFindOrAdd(globaltab,"len");
-    iter = htabFindOrAdd(globaltab,"substr");
-    iter = htabFindOrAdd(globaltab,"ord");
-    iter = htabFindOrAdd(globaltab,"chr");
+    globaltab = htabInit(503);
+    htabFindOrAdd(globaltab,"inputs");
+    htabFindOrAdd(globaltab,"inputi");
+    htabFindOrAdd(globaltab,"inputf");
+    htabFindOrAdd(globaltab,"print");
+    htabFindOrAdd(globaltab,"int2float");
+    htabFindOrAdd(globaltab,"float2int");
+    htabFindOrAdd(globaltab,"len");
+    htabFindOrAdd(globaltab,"substr");
+    htabFindOrAdd(globaltab,"ord");
+    htabFindOrAdd(globaltab,"chr");
 
 }
 
@@ -58,7 +58,9 @@ void exec(){
     GET_NEXT(Token);//
     func();
     if(!functionParse){
+       
         func_n();
+       
         HTabIterator_t tmp = htabFind(globaltab,"main");
         if(!tmp.ptr){
             errorExit(semanticIdentifierError,"main function missing\n");
@@ -73,14 +75,15 @@ void func(){
     CHECK_TYPE(KEYWORD_FUNC);
     GET_NEXT(Token);
     CHECK_TYPE(ID);
-    localtab = htabInit(19501);
+    localtab = htabInit(503);
     if(functionParse){ // iba pri prvom prechode kvoli definiciam funkcii
         HTabIterator_t tmp = htabFind(globaltab,Token->value);
         if(tmp.ptr){
             htabFree(localtab);
             errorExit(semanticIdentifierError,"parser: function redefinition\n");
         }
-        HTabIterator_t iter = htabFindOrAdd(globaltab,Token->value);
+        //HTabIterator_t iter = 
+        htabFindOrAdd(globaltab,Token->value);
     }
     GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
@@ -102,7 +105,6 @@ void func(){
                     return;
                 }  
     body(localtab);
-    htabFree(localtab);
     return;
 }
 
@@ -195,6 +197,7 @@ void types_n(){
 
 void func_n(){
     TEST_EOF();
+   
     GET_NEXT(Token);
     TEST_EOF();
     TEST_TYPE(EOL);
@@ -202,6 +205,7 @@ void func_n(){
         CHECK_TYPE(EOL);
         GET_NEXT(Token);//
         func();
+      
         func_n();
     }
     return;
@@ -216,6 +220,8 @@ void body(HTab_t* localtab){
         return;
     }
     statement_n(localtab);
+  
+    return;
 }
 
 void statement(HTab_t* localtab){
@@ -268,6 +274,8 @@ void statement(HTab_t* localtab){
                 break;
 
         case BRACKET_CURLY_CLOSE: 
+               
+                return;
                 break;
 
         default: 
@@ -284,6 +292,7 @@ void statement(HTab_t* localtab){
 
 void statement_n(HTab_t* localtab){
 
+   
     if(Token->type == BRACKET_CURLY_CLOSE){
         return;
     }
@@ -297,6 +306,7 @@ void statement_n(HTab_t* localtab){
 
 void definition(HTab_t* localtab){
 
+   
     CHECK_TYPE(ID);
     Token_t *tokenID = Token;
     GET_NEXT(Token);
@@ -355,21 +365,23 @@ void _if(HTab_t* localtab){
         errorExit(syntaxError,"no expression in if\n");
     }
     expression(localtab);
-    HTab_t* nextlocaltab = htabInit(19501);
+   // HTab_t* nextlocaltab = htabInit(503);
    // nextlocaltab = localtab;
     
-    body(nextlocaltab);
+    body(localtab);
     
     
     GET_NEXT(Token);
     CHECK_TYPE(KEYWORD_ELSE);
-    
+  
     GET_NEXT(Token);
-    htabClear(nextlocaltab);
+   // htabClear(nextlocaltab);
     //nextlocaltab = localtab;
     
-    body(nextlocaltab);
-    htabFree(nextlocaltab);
+    body(localtab);
+   
+    return;
+    //htabFree(nextlocaltab);
 
 }
 
@@ -400,6 +412,7 @@ void _for(HTab_t* localtab){
 }
 
 void _call(HTab_t* localtab){
+
 
     CHECK_TYPE(ID);
     HTabIterator_t tmp = htabFind(globaltab,Token->value);
@@ -496,7 +509,7 @@ void id_n(HTab_t* localtab){
     GET_NEXT(Token);
     CHECK_TYPE(ID);
             HTabIterator_t tmp = htabFind(localtab,Token->value);
-            if(!tmp.ptr){
+            if(!tmp.ptr && strcmp(Token->value,"_")){
                 htabFree(localtab);
                 errorExit(semanticIdentifierError,"variable not defined\n");
             }
