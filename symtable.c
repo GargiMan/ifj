@@ -46,6 +46,8 @@ void htabClear(HTab_t* t) {
         while (t->array[i] != NULL) {
             HTabItem_t* item_next = t->array[i]->next;
             free(t->array[i]->key);
+            free(t->array[i]->data->params);
+            free(t->array[i]->data->functypes);
             free(t->array[i]->data);
             free(t->array[i]);
             t->array[i] = item_next;
@@ -176,6 +178,8 @@ void htabErase(HTab_t* t, HTabIterator_t it) {
 
     //erase item
     free(it.ptr->key);
+    free(t->array[i]->data->params);
+    free(t->array[i]->data->functypes);
     free(it.ptr->data);
     free(it.ptr);
     t->size--;

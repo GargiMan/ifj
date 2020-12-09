@@ -4,8 +4,8 @@
  * @brief IFJ20 - Header for symtable operations
  */
 
-#ifndef __SYMTABLE_H__
-#define __SYMTABLE_H__
+#ifndef SYMTABLE_H
+#define SYMTABLE_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ typedef struct HTabData {
   HTabDataType_t type;      // data type
   bool def;                 // defined
   char* params;             // parameters
-  char* funcTypes;              // global
+  char* functypes;          // global
 } HTabData_t;
 
 // Item typedef
@@ -36,7 +36,7 @@ typedef struct HTabItem HTabItem_t;     // typedef pre item
 
 // Item
 struct HTabItem {
-    HTabKey_t key;                      // hash kluc prvku
+    HTabKey_t key;                      // hash kluc prvku , id
     HTabData_t* data;                   // hodnota(obsah) prvku
     HTabItem_t* next;                   // ukazatel na dalsi prvok
 };                                      // neuplna deklarace struktury
@@ -89,4 +89,4 @@ HTabKey_t htabIteratorGetKey(HTabIterator_t it);                            // v
 HTabData_t* htabIteratorGetData(HTabIterator_t it);                        // vraci hodnotu ze zaznamu iteratora
 HTabData_t* htabIteratorSetData(HTabIterator_t it, HTabData_t* data);      // zmeni a vraci hodnotu ze zaznamu iteratora
 
-#endif // __SYMTABLE_H__
+#endif // SYMTABLE_H
