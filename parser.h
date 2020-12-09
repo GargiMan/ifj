@@ -16,11 +16,12 @@
 #include "symtable.h"
 #define CHECK_TYPE(TOKENTYPE) \
     if (Token->type != TOKENTYPE){ \
+        htabFree(localtab); \
         errorExit(syntaxError,"parser: syntaxERR \n"); \
     }   \
 
 #define CHECK_EOF() \
-    if (Token == list.pTail) {return;}else{ errorExit(syntaxError, "No EOF\n");}
+    if (Token == list.pTail) {return;}else{ htabFree(localtab); errorExit(syntaxError, "No EOF\n");}
 
 #define TEST_EOF() \
     if (Token == list.pTail) {return;}
@@ -43,13 +44,13 @@
 
 #define SET_FLAG(flag)(flag = 1) \
 
-#define GET_NEXT(token) if(token->pNext == NULL){errorExit(syntaxError, "Function with no ending\n");}else{(token = TOKEN_NEXT(token));}
+#define GET_NEXT(token) if(token->pNext == NULL){htabFree(localtab); errorExit(syntaxError, "Function with no ending\n");}else{(token = TOKEN_NEXT(token));}
 
     
 Token_t *Token;
 int decisionFlag;
 int functionParse;
-
+HTab_t* localtab;
 void dataInit();
 void parse();//
 void prog();//
