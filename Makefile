@@ -17,8 +17,10 @@ all: $(PROG)
 $(PROG): $(OBJ)
 	$(C) $^ -o $@ -lm
 
-test:
-	./tests/ic20ifj ./tests/factorial.go
+test: $(PROG)
+	./ifj20 <tests/factorial.go
+	./ifj20 <tests/factorial-r.go
+	./ifj20 <tests/string.go
 
 check: zip
 	./is_it_ok.sh $(LOGIN).zip $(LOGIN)

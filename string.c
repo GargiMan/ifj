@@ -59,3 +59,19 @@ void strDestroy(String_t* s) {
 
     return;
 }
+
+char* charPtrAppendChars(char* cptr, char* cs) {
+
+    size_t cptr_size = (cptr ? strlen(cptr) : 0);
+    size_t cs_size = (cs ? strlen(cs) : 0);
+
+    if (cs_size == 0) return cptr;
+
+    cptr = realloc(cptr, (cptr_size + cs_size + 1) * sizeof(char));
+    if (!cptr) errorExit(internalError, "string : CharPtr allocation failed");
+    cptr[cptr_size + cs_size + 1] = '\0';
+
+    for (size_t i = 0; i < cs_size; i++) cptr[cptr_size + i] = cs[i];
+
+    return cptr;
+}

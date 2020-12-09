@@ -30,7 +30,7 @@ int main() {
 
     //debug
     #ifdef DEBUG
-    Token_t* temp = LIST_HEAD;
+    Token_t* temp = LIST_HEAD(list);
     while (temp) {
         if (temp->type == ID || temp->type == DATA_STRING || temp->type == DATA_INT || temp->type == DATA_FLOAT64) {
             printf("%d\t | %s\n", temp->type, temp->value);
