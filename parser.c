@@ -12,11 +12,12 @@ int parse(){
     prog();
     Token = list.pHead;
     prog();
+    htabClear(globaltab);
+    htabFree(globaltab);
     return 0;
 }
 
 int dataInit(){
-    frame = 0;
     functionParse = 1;
     Token = list.pHead;
     globaltab = htabInit(19501);
@@ -75,7 +76,7 @@ int func(){
     if(functionParse){ // iba pri prvom prechode kvoli definiciam funkcii
         HTabIterator_t tmp = htabFind(globaltab,Token->value);
         if(tmp.ptr){
-            errorExit(semanticFunctionError,"parser: function redefinition\n");
+            errorExit(semanticIdentifierError,"parser: function redefinition\n");
         }
         HTabIterator_t iter = htabFindOrAdd(globaltab,Token->value);
     }
@@ -98,6 +99,8 @@ int func(){
                     return 0;
                 }  
     body(localtab);
+    htabClear(localtab);
+    htabFree(localtab);
     return 0;
 }
 
@@ -143,7 +146,7 @@ int params_n(HTab_t* localtab){
     CHECK_TYPE(ID);
     HTabIterator_t tmp = htabFind(localtab,Token->value);
     if(tmp.ptr){
-        errorExit(semanticFunctionError,"parser: function parameters redefinition\n");
+        errorExit(semanticIdentifierError,"parser: function parameters redefinition\n");
     }
     tmp = htabFindOrAdd(localtab,Token->value);
     GET_NEXT(Token);
@@ -358,7 +361,8 @@ int _if(HTab_t* localtab){
     //nextlocaltab = localtab;
     
     body(nextlocaltab);
-    
+    htabClear(nextlocaltab);
+    htabFree(nextlocaltab);
 
 }
 
@@ -392,7 +396,7 @@ int _call(HTab_t* localtab){
     CHECK_TYPE(ID);
     HTabIterator_t tmp = htabFind(globaltab,Token->value);
     if(!tmp.ptr){
-        errorExit(semanticFunctionError,"calling function that is not defined\n");
+        errorExit(semanticIdentifierError,"calling function that is not defined\n");
     }
     GET_NEXT(Token);
     CHECK_TYPE(BRACKET_ROUND_OPEN);
@@ -420,7 +424,7 @@ int _call_param(HTab_t* localtab){
 
         case ID:
                 if(!strcmp("_",Token->value)){
-                    errorExit(semanticOtherError,"parser: _ in call param\n");
+                    errorExit(semanticIdentifierError,"parser: _ in call param\n");
                 }
                 if(!tmp.ptr){
                         errorExit(semanticIdentifierError,"variable in function call is not defined\n");
@@ -525,7 +529,7 @@ int expression(HTab_t* localtab){
 		if(decisionFlag){errorExit(syntaxError,"= in expression\n");break;}
 		TEST_TYPE(OPERATOR_DEFINE);
 		if(decisionFlag){errorExit(syntaxError,":= in expression\n");break;}
-        if(Token->type == ID && !strcmp("_",Token->value)){errorExit(semanticOtherError,"_ in expression\n");break;}
+        if(Token->type == ID && !strcmp("_",Token->value)){errorExit(semanticIdentifierError,"_ in expression\n");break;}
 		GET_NEXT(Token);
 
 	}

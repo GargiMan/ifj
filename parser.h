@@ -48,10 +48,7 @@
     
 Token_t *Token;
 int decisionFlag;
-char* funcName;
-int returnFlag;
 int functionParse;
-int frame;
 /*
 int parse();//
 int prog();//
