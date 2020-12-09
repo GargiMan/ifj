@@ -78,21 +78,21 @@ extern List_t list;
 #define TOKEN_SET_VALUE(token, value) (TOKEN_VALUE(token) = value)
 #define TOKEN_SET_NEXT(token, next) (TOKEN_NEXT(token) = next)
 
-#define TOKEN_CREATE(token) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
-#define TOKEN_CREATE_WT(token, type) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_TYPE(token, type); TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "list.h : Token allocation failed");}} while (0)
+#define TOKEN_CREATE(token) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "tokenlist : Token allocation failed");}} while (0)
+#define TOKEN_CREATE_WT(token, type) do { if ((token = malloc(sizeof(Token_t)))) {TOKEN_SET_TYPE(token, type); TOKEN_SET_VALUE(token, NULL); TOKEN_SET_NEXT(token, NULL);} else {errorExit(internalError, "tokenlist : Token allocation failed");}} while (0)
 #define TOKEN_MOVE_NEXT(token) (token = TOKEN_NEXT(token))
 #define TOKEN_IS_TYPE(token, type) (TOKEN_TYPE(token) == type)
 #define TOKEN_DESTROY(token) do { free(token->value); free(token); } while (0)
 
 //list operations
 
-#define LIST_HEAD (list.pHead)
-#define LIST_TAIL (list.pTail)
+#define LIST_HEAD(list) (list.pHead)
+#define LIST_TAIL(list) (list.pTail)
 
-#define LIST_IS_EMPTY (!LIST_HEAD)
+#define LIST_IS_EMPTY(list) (!LIST_HEAD(list))
 
-#define LIST_ADD_TOKEN(token) do { if (LIST_IS_EMPTY) {LIST_HEAD = token; LIST_TAIL = token;} else {TOKEN_SET_NEXT(LIST_TAIL, token); LIST_TAIL = token;}} while (0)
-#define LIST_ADD_TOKEN_WT(token, type) do { TOKEN_CREATE_WT(token, type); if (LIST_IS_EMPTY) {LIST_HEAD = token; LIST_TAIL = token;} else {TOKEN_SET_NEXT(LIST_TAIL, token); LIST_TAIL = token;}} while (0)
-#define LIST_CLEAR while (!LIST_IS_EMPTY) {LIST_TAIL = TOKEN_NEXT(LIST_HEAD); TOKEN_DESTROY(LIST_HEAD); LIST_HEAD = LIST_TAIL;}
+#define LIST_ADD_TOKEN(list, token) do { if (LIST_IS_EMPTY(list)) {LIST_HEAD(list) = token; LIST_TAIL(list) = token;} else {TOKEN_SET_NEXT(LIST_TAIL(list), token); LIST_TAIL(list) = token;}} while (0)
+#define LIST_ADD_TOKEN_WT(list, token, type) do { TOKEN_CREATE_WT(token, type); if (LIST_IS_EMPTY(list)) {LIST_HEAD(list) = token; LIST_TAIL(list) = token;} else {TOKEN_SET_NEXT(LIST_TAIL(list), token); LIST_TAIL(list) = token;}} while (0)
+#define LIST_CLEAR(list) while (!LIST_IS_EMPTY(list)) {LIST_TAIL(list) = TOKEN_NEXT(LIST_HEAD(list)); TOKEN_DESTROY(LIST_HEAD(list)); LIST_HEAD(list) = LIST_TAIL(list);}
 
 #endif // TOKENLIST_H

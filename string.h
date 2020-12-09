@@ -30,4 +30,6 @@ void strAppendChars(String_t* s, char* cs);
 
 void strDestroy(String_t* s);
 
+char* charPtrAppendChars(char* cptr, char* cs);
+
 #endif // STRING_H

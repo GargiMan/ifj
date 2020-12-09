@@ -8,7 +8,8 @@
 #define RESOURCES_H
 
 #include "tokenlist.h"
+#include "symtable.h"
 
-#define FREE_RESOURCES do {LIST_CLEAR;} while (0)
+#define FREE_RESOURCES do {LIST_CLEAR(list); htabFree(globaltab);} while (0)
 
 #endif // RESOURCES_H
