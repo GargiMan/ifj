@@ -322,7 +322,7 @@ void definition(){
 
 void assignment(){
 
-    id();
+    ids();
     
     CHECK_TYPE(OPERATOR_ASSIGN); 
     GET_NEXT(Token);  
@@ -479,7 +479,7 @@ void _return(){
     
 }
 
-void id(){
+void ids(){
 
     CHECK_TYPE(ID);
             HTabIterator_t tmp = htabFind(localtab,Token->value);
@@ -488,11 +488,11 @@ void id(){
                 errorExit(semanticIdentifierError,"variable not defined\n");
             }
     GET_NEXT(Token);
-    id_n();
+    ids_n();
 
 }
 
-void id_n(){
+void ids_n(){
 
     if(Token->type != COMMA){
         return;
@@ -505,7 +505,7 @@ void id_n(){
                 errorExit(semanticIdentifierError,"variable not defined\n");
             }
     GET_NEXT(Token);
-    id_n();
+    ids_n();
 
 }
 

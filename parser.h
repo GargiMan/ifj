@@ -67,8 +67,8 @@ void statement_n();//
 void statement();//
 void definition();//
 void assignment();//
-void id();//
-void id_n();//
+void ids();//
+void ids_n();//
 void expressions();//
 void expression_n();//
 void _if();//
