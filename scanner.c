@@ -14,7 +14,7 @@ void getTokens() {
 
     while (!IS_EOF(c = getchar())) {
 
-        if (IS_NOT_TERM(c)) {                           //not term
+        if (IS_NOT_TOKEN(c)) {                          //not token
             continue;
 
         } else if (IS_EOL(c)) {                         //eol
@@ -130,7 +130,7 @@ void getTokens() {
                             break;
 
                         case 'x':
-                            strAppendChar(&string, c);              //add x
+                            strAppendChar(&string, c);              //write x
                             strAppendChar(&string, getchar());      //write first hex;
                             strAppendChar(&string, getchar());      //write second hex;
                                                                     //check hex value
@@ -157,8 +157,8 @@ void getTokens() {
             TOKEN_CREATE(token);
             strClear(&string);
             strAppendChar(&string, c);
-            int state = 0; //0 int , 1 float64 , 2 int exponent , 3 float64 exponent
-            int expsignset = 0; //0 - unset , 1 - set
+            int state = 0;          //0 int , 1 float64 , 2 int exponent , 3 float64 exponent
+            int expsignset = 0;     //0 unset , 1 set
 
             while ((c = getchar())) {
 
@@ -183,12 +183,12 @@ void getTokens() {
                         errorExit(lexicalError, "scanner : More than one exponent in number\n");
                     } else {
 
-                        if (IS_DOT(string.str[string.len - 1])) {         //dot before expoment
+                        if (IS_DOT(string.str[string.len - 1])) {
                             strDestroy(&string);
                             errorExit(lexicalError, "scanner : Float value must have number after floating point\n");
                         }
 
-                        if (state == 1 && IS_ZERO_CHAR(string.str[string.len - 1])) {  //zero at end of float
+                        if (state == 1 && IS_ZERO_CHAR(string.str[string.len - 1])) {
                             strDestroy(&string);
                             errorExit(lexicalError, "scanner : Redundant zeroes at end of float number before exponent value\n");
                         }
@@ -198,7 +198,7 @@ void getTokens() {
                     }
 
                 } else if (IS_PLUS(c) || IS_MINUS(c)) {
-                    if (!(expsignset) && (state & 2) && IS_EXPONENT(string.str[string.len - 1])) {     //plus or minus not after exponent
+                    if (!(expsignset) && (state & 2) && IS_EXPONENT(string.str[string.len - 1])) {
                         strAppendChar(&string, c);
                         expsignset = 1;
                     } else if (expsignset || !IS_EXPONENT(string.str[string.len - 1])) {
@@ -227,7 +227,7 @@ void getTokens() {
                 errorExit(lexicalError, "scanner : Float number is missing float value\n");
             }
 
-            if (state == 1 && IS_ZERO_CHAR(string.str[string.len - 1]) && !IS_DOT(string.str[string.len - 2])) {               //zero at end of float
+            if (state == 1 && IS_ZERO_CHAR(string.str[string.len - 1]) && !IS_DOT(string.str[string.len - 2])) {
                 strDestroy(&string);
                 errorExit(lexicalError, "scanner : Redundant zeroes at end of float number value\n");
             }
@@ -241,7 +241,7 @@ void getTokens() {
             TOKEN_SET_TYPE(token, (state & 1 ? DATA_FLOAT64 : DATA_INT));
             LIST_ADD_TOKEN(list, token);
 
-        } else if (IS_APLHA(c) || IS_UNDERSCORE(c)) {   //id
+        } else if (IS_APLHA(c) || IS_UNDERSCORE(c)) {   //id or keyword
             
             TOKEN_CREATE(token);
             strClear(&string);

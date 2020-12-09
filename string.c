@@ -24,8 +24,6 @@ void strIncreaseSize(String_t* s) {
 
     size_t alloc_size = sizeof(char) * ((s->len / STR_ALLOC_INC) + STR_ALLOC_INC + 1);      //+1 for \0
 
-    //printf("%ld/%ld\n", s->len, alloc_size);
-
     s->str = realloc(s->str, alloc_size);
     if (!(s->str)) errorExit(internalError, "string : String allocation failed");
     if (s->len == 0) s->str[0] = '\0';
