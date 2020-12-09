@@ -55,7 +55,7 @@ void prog(){
 
 void exec(){
 
-    GET_NEXT(Token);//
+    GET_NEXT(Token);
     func();
     if(!functionParse){
        
@@ -82,7 +82,6 @@ void func(){
             htabFree(localtab);
             errorExit(semanticIdentifierError,"parser: function redefinition\n");
         }
-        //HTabIterator_t iter = 
         htabFindOrAdd(globaltab,Token->value);
     }
     GET_NEXT(Token);
@@ -111,7 +110,6 @@ void func(){
 void params(HTab_t* localtab){
     
     if(Token->type == BRACKET_ROUND_CLOSE){
-        //iter.ptr->data->params = "";
         return ;  // no params
     }
     CHECK_TYPE(ID);
@@ -163,19 +161,19 @@ void func_types(){
 
     if(Token->type == BRACKET_CURLY_OPEN){
 
-        //iter.ptr->data->type = TYPE_UNDEFINED; //return type undefined
+       //return type undefined
         return;  // no return types && no brackets
     }
 
     if(Token->type == BRACKET_ROUND_OPEN && Token->pNext->type == BRACKET_ROUND_CLOSE){
 
-       // iter.ptr->data->type = TYPE_UNDEFINED; //return type undefined
+        //return type undefined
         GET_NEXT(Token);// no return types && brackets
         return;
     }
    CHECK_TYPE(BRACKET_ROUND_OPEN);
    GET_NEXT(Token);
-   //SET_FLAG(returnFlag);
+  
    type();
    GET_NEXT(Token);
    types_n();
@@ -203,7 +201,7 @@ void func_n(){
     TEST_TYPE(EOL);
     if (decisionFlag){
         CHECK_TYPE(EOL);
-        GET_NEXT(Token);//
+        GET_NEXT(Token);
         func();
       
         func_n();
@@ -283,9 +281,6 @@ void statement(HTab_t* localtab){
                 errorExit(syntaxError,"in statement"); break;
     }
 
-    /* if(returnFlag && Token->type != KEYWORD_RETURN){
-        errorExit(syntaxError,"function with return type/s doesnt return anything");
-    }*/
     return;
    
 }
@@ -312,12 +307,12 @@ void definition(HTab_t* localtab){
     GET_NEXT(Token);
     CHECK_TYPE(OPERATOR_DEFINE);
     HTabIterator_t tmp = htabFind(localtab,tokenID->value);
-    if(tmp.ptr /*&& tmp.ptr->data->defined*/){
+    if(tmp.ptr){
         htabFree(localtab);
         errorExit(semanticIdentifierError,"variable redefinition\n");
     }
     tmp = htabFindOrAdd(localtab,tokenID->value);
-    //tmp.ptr->data->defined = 1;
+   
 
     GET_NEXT(Token);
     expression(localtab);
@@ -365,8 +360,6 @@ void _if(HTab_t* localtab){
         errorExit(syntaxError,"no expression in if\n");
     }
     expression(localtab);
-   // HTab_t* nextlocaltab = htabInit(503);
-   // nextlocaltab = localtab;
     
     body(localtab);
     
@@ -375,13 +368,10 @@ void _if(HTab_t* localtab){
     CHECK_TYPE(KEYWORD_ELSE);
   
     GET_NEXT(Token);
-   // htabClear(nextlocaltab);
-    //nextlocaltab = localtab;
     
     body(localtab);
    
     return;
-    //htabFree(nextlocaltab);
 
 }
 
@@ -541,6 +531,7 @@ void expression_n(HTab_t* localtab){
 }
 
 void expression(HTab_t* localtab){
+
     if(Token->type == EOL){
         htabFree(localtab);
         errorExit(syntaxError,"no expression\n");
